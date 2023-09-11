@@ -1,6 +1,7 @@
 ## Content of `article_01` subdirectory
 
 Examples written in F# that are used in the following article:
+[Funkcionální programovací jazyk F#](https://www.root.cz/clanky/funkcionalni-programovaci-jazyk-f/)
 
 - function.fs
 - function.fsx
