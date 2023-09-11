@@ -1,0 +1,1444 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>Funkcionální programovací jazyk F#</title>
+<meta name="Author" content="Pavel Tisnovsky" />
+<meta name="Generator" content="vim" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<style type="text/css">
+         body {color:#000000; background:#ffffff;}
+         h1  {font-family: arial, helvetica, sans-serif; color:#ffffff; background-color:#c00000; text-align:center; padding-left:1em}
+         h2  {font-family: arial, helvetica, sans-serif; color:#ffffff; background-color:#0000c0; padding-left:1em; text-align:left}
+         h3  {font-family: arial, helvetica, sans-serif; color:#000000; background-color:#c0c0c0; padding-left:1em; text-align:left}
+         h4  {font-family: arial, helvetica, sans-serif; color:#000000; background-color:#e0e0e0; padding-left:1em; text-align:left}
+         a   {font-family: arial, helvetica, sans-serif;}
+         li  {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify; width:450px;}
+         ol  {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify; width:450px;}
+         ul  {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify; width:450px;}
+         p   {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify;}
+         pre {background:#e0e0e0}
+</style>
+</head>
+
+<body>
+
+<h1>Funkcionální programovací jazyk F#</h1>
+
+<h3>Pavel Tišnovský</h3>
+
+<p></p>
+
+<h1>Úvodník</h1>
+
+<p>Před neuvěřitelnými 50 lety vznikl první koncept jazyka ML. Jedná se o programovací jazyk, který byl v mnoha ohledech přelomový, a to díky svému typovému systému, jenž byl zkombinovaný s pattern matchingem. Jazykem ML se inspiroval nejenom jazyk OCaml, ale taktéž programovací jazyk F#, o němž dnes začíná na Rootu seriál.</p>
+
+
+
+<h2>Obsah</h2>
+
+<p><a href="#k01">1. Funkcionální programovací jazyk F#</a></p>
+<p><a href="#k02">2. Od programovacího jazyka ML k&nbsp;jazyku F#</a></p>
+<p><a href="#k03">3. Prapředek F#: programovací jazyk ML</a></p>
+<p><a href="#k04">4. Ukázky syntaxe a sémantiky programovacího jazyka ML</a></p>
+<p><a href="#k05">5. Další informace o jazyku ML resp.&nbsp;Standard ML</a></p>
+<p><a href="#k06">6. Od Standard ML k&nbsp;jazykům Caml a OCaml</a></p>
+<p><a href="#k07">7. Ukázky syntaxe a sémantiky programovacího jazyka OCaml</a></p>
+<p><a href="#k08">8. Od OCamlu k&nbsp;programovacímu jazyku F#</a></p>
+<p><a href="#k09">9. Jak začít s&nbsp;jazykem F#?</a></p>
+<p><a href="#k10">10. Pískoviště (playground) pro první seznámení s&nbsp;možnostmi programovacího jazyka</a></p>
+<p><a href="#k11">11. Webová konzole pro programovací jazyk F#</a></p>
+<p><a href="#k12">12. Univerzální webové prostředí Repl.it a jazyk F#</a></p>
+<p><a href="#k13">13. Konzole s&nbsp;interpretrem jazyka F# (<i>fsi</i>)</a></p>
+<p><a href="#k14">14. Dva základní koncepty, na nichž je jazyk F# postaven: funkce a datové typy</a></p>
+<p><a href="#k15">15. Explicitní specifikace typu argumentů funkcí</a></p>
+<p><a href="#k16">16. Obsah druhé části seriálu</a></p>
+<p><a href="#k17">17. Seriál o OCaml &ndash; async v&nbsp;praxi?</a></p>
+<p><a href="#k18">18. Repositář s&nbsp;demonstračními příklady</a></p>
+<p><a href="#k19">19. Literatura</a></p>
+<p><a href="#k20">20. Odkazy na Internetu</a></p>
+
+
+
+<p><a name="k01"></a></p>
+<h2 id="k01">1. Funkcionální programovací jazyk F#</h2>
+
+<p><i>&bdquo;Writing C# feels like filling out government forms in triplicate.&ldquo;</i></p>
+
+<p>Letos slavíme další výročí, které se vztahuje k&nbsp;(historickým)
+programovacím jazykům. Před padesáti (!) lety totiž začala práce na tvorbě
+standardu programovacího jazyka <i>ML</i>, přičemž výsledek byl nazván &ndash;
+pozor, překvapení &ndash; <i>StandardML</i> neboli zkráceně <i>SML</i>.
+S&nbsp;jazykem ML jsme se již na stránkách Roota seznámili (viz odkazy uvedené
+níže), ovšem co je důležité: tento jazyk se stal základem pro vývoj dalších
+programovacích jazyků, mezi něž patří <i>CAML</i> (<i>Categorical Abstract
+Machine Language</i>), <i>OCaml</i> (<i>Objective Caml</i>) a v&nbsp;neposlední
+řadě i jazyk <i>F#</i>. A právě tímto nepochybně velmi zajímavým a v&nbsp;praxi
+používaným (ve své nice) programovacím jazykem se budeme zabývat v&nbsp;nově
+vznikajícím seriálu.</p>
+
+<img src="https://i.iinfo.cz/images/148/f-1-1.png" class="image-1103366" width="396" height="349" alt="&#160;" title="Autor: f# authors, OCaml authors, etc., podle licence: &lt;a href=&quot;http://en.wikipedia.org/wiki/Rights_Managed&quot;&gt;Rights Managed&lt;/a&gt;" />
+<p><i>Obrázek 1: Logo programovacího jazyka F# (ve Státech asi nemají znalost
+středoevropských reálií, když vybrali toto logo).</i></p>
+
+<p><div class="rs-tip-major">Poznámka: jazyk F# je sice poměrně úzce spojený
+s&nbsp;platformou .NET, ovšem lze ho využít i na Linuxu a co je zejména pro
+začátečníky (a vůbec pro vývojáře, kteří se chtějí s&nbsp;F# jen seznámit)
+důležité &ndash; pro jazyk F# existují webová vývojová prostředí, které
+umožňují si F# vyzkoušet, a to zcela bez nutnosti instalace F#+.NET (a kupodivu
+si s&nbsp;webovými prostředími v&nbsp;tomto seriálu vystačíme poměrně
+nadlouho).</div></p>
+
+
+
+<p><a name="k02"></a></p>
+<h2 id="k02">2. Od programovacího jazyka ML k&nbsp;jazyku F#</h2>
+
+<p><i>&bdquo;Sometimes, the elegant implementation is a function. Not a method.
+Not a class. Not a framework. Just a function.&ldquo;<br />
+John Carmack</i></p>
+
+<p>Programovací jazyk F# pochopitelně nevznikl na zelené louce. Jeho prapředkem
+je programovací jazyk nazvaný jednoduše <i>ML</i>, z&nbsp;něhož byl o několik
+let později odvozen jazyk <i>Standard ML</i>, dále jazyk nazvaný <i>Caml</i> a
+z&nbsp;něho <i>OCaml</i>. A právě na těchto (nutno podotknout, že dosti
+pevných) základech vznikl programovací jazyk <i>F#</i>, který byl navíc navržen
+takovým způsobem, aby velmi dobře zapadl do ekosystému postaveného okolo
+frameworku <a href="https://dotnet.microsoft.com/en-us/">.NET</a>, v&nbsp;němž
+se kromě toho používají jazyky C# a Visual Basic odvozené z&nbsp;Algolské větve
+programovacích jazyků. Ovšem při vzniku F# se jeho autoři inspirovali i
+některými dalšími programovacími jazyky, které obvykle neřadíme do &bdquo;ML
+větve&ldquo;. Patří sem například Erlang, Haskell (i když ten je inspirován
+jazykem ML), Python či programovací jazyk Scala.</p>
+
+<a href="https://www.root.cz/obrazek/1103367/"><img src="https://i.iinfo.cz/images/148/f-1-2-prev.png" class="image-1103367" width="370" height="225" data-prev-filename="https://i.iinfo.cz/images/148/f-1-2-prev.png" data-prev-width="370" data-prev-height="225" data-large-filename="https://i.iinfo.cz/images/148/f-1-2-large.png" data-large-width="720" data-large-height="439" alt="&#160;" title="Autor: f# authors, OCaml authors, etc., podle licence: &lt;a href=&quot;http://en.wikipedia.org/wiki/Rights_Managed&quot;&gt;Rights Managed&lt;/a&gt;" /></a>
+<p><i>Obrázek 2: Jazyky více či méně inspirované poněkud přehlíženým jazykem
+ML, jenž však měl a dodnes má velký vliv na celý tento obor IT.<br />
+Zdroj: https://erkin.party/blog/190208/spaghetti/</i></p>
+
+<p><div class="rs-tip-major">Poznámka: vývoj důležitých programovacích jazyků
+se shrnut <a
+href="https://ccrma.stanford.edu/courses/250a-fall-2005/docs/ComputerLanguagesChart.png">na
+tomto grafu</a>.</div></p>
+
+
+
+<p><a name="k03"></a></p>
+<h2 id="k03">3. Prapředek F#: programovací jazyk ML</h2>
+
+<p>Připomeňme si nyní v&nbsp;krátkosti historii vývoje jazyka ML. Programovací
+jazyk ML vznikl v&nbsp;univerzitním prostředí ve Velké Británii, takže se jedná
+o další oblast, v&nbsp;níž vznikl nějaký důležitý koncept v&nbsp;oblasti teorie
+programovacích jazyků (mezi další takové důležité a známé &bdquo;líhně&ldquo;
+patřily pochopitelně USA s&nbsp;MIT, Bell Labs, IBM a taktéž kontinentální
+Evropa s&nbsp;Prologem a algolskou a následně i pascalskou větví programovacích
+jazyků). První kroky vedoucí později ke vzniku jazyka ML provedla na začátku
+sedmdesátých let minulého století skupina vědců z&nbsp;laboratoře pro výzkum
+umělé inteligence z&nbsp;univerzity v&nbsp;Edinburgu. Jak bylo v&nbsp;té době
+v&nbsp;oblasti AI prakticky nepsaným standardem, používal se převážně <a
+href="https://www.root.cz/clanky/jemny-uvod-do-rozsahleho-sveta-jazyku-lisp-a-scheme/">programovací
+jazyk LISP</a>, který byl ovšem doplněný o Prolog, což byla tehdy žhavá
+novinka, protože Prolog vznikl v&nbsp;roce 1972.</p>
+
+<p><div class="rs-tip-major">Poznámka: traduje se sice rivalita panující mezi
+výzkumnými skupinami používajícími LISP se skupinami používajícími Prolog, ale
+na tomto příkladu je vidět, že je možné využít možností obou konceptuálně
+odlišných jazyků.</div></p>
+
+<p>Výše zmíněná skupina pro výzkum v&nbsp;oblasti umělé inteligence pracovala
+na vývoji systému pojmenovaného <i>LCF</i> (plným názvem <i>Logic For
+Computable Functions</i>), jenž byl určen pro dokazování teorémů. Tento systém
+byl naprogramován v&nbsp;LISPu. Poněkud předbíháme, ale na tomto místě je
+vhodné poznamenat, že ideové stopy LISPu jsou v&nbsp;jazyku ML poměrně dobře
+patrné, i když nikoli na syntaktické úrovni (tam je naopak ML jazyk
+s&nbsp;minimem kulatých závorek, na rozdíl od LISPu). A právě pro potřeby LCF
+vznikl nový (tehdy vlastně doménově specifický) jazyk ML. To vlastně znamená,
+že samotný ML byl pouze vedlejším produktem práce na LCF, teprve poději došlo
+k&nbsp;osamostatnění ML.</p>
+
+<p>První varianta ML pro LCF vznikala v&nbsp;období 1973 až 1978. Původně byly
+zdrojové kódy transpilovány do LISPu a teprve poté překládány do strojového
+(objektového) kódu. Ovšem kromě technických detailů (jakkoli jsou zajímavé) je
+důležité, kdo se na vývoji ML podílel a jaké myšlenky zde byly využity. Jednou
+z&nbsp;inspirací byl jazyk ISWIM (<i>If you See What I Mean</i>) Petera Landina
+z&nbsp;šedesátých let. Tento jazyk byl založen na lambda kalkulu, podporoval
+funkce vyššího řádu a používal dynamické typování a lexikální obory platnosti.
+Peter Landin pro tento projekt vytvořil <a
+href="https://en.wikipedia.org/wiki/J_operator">operátor J</a>. Na vývoji ML se
+nepřímo podílel i Christopher Strachey, jenž dříve vytvořil jazyk CPL, což je
+praprapředek céčka (CPL &rarr; BCPL &rarr; B &rarr; C). Mimochodem, právě
+Christopher Strachey zavedl v&nbsp;IT několik nových termínů, například od něj
+pochází označení &bdquo;syntactic sugar&ldquo;.</p>
+
+<p>V&nbsp;jazyce ML se objevilo i automatické odvozování datových typů (<i>type
+inference</i>), což je technika, která byla shrnuta v&nbsp;roce 1978 pod jménem
+&bdquo;Hindley-Milner type inference&ldquo;. A ve stejném roce byl ML pro LCF
+konečně dokončen.</p>
+
+<p><div class="rs-tip-major">Poznámka: způsobů typové inference však existuje
+větší množství, nejenom Hindley-Milner.</div></p>
+
+<p>Vzhledem k&nbsp;tomu, že ML byl součástí LCF a nebylo ho možné používat mimo
+tento systém (proto se taktéž někdy setkáme s&nbsp;označením LCF/ML), objevily
+se snahy o plné oddělení ML jako samostatného jazyka. Takto vznikl &bdquo;ML
+under VAX&ldquo; neboli zkráceně &bdquo;VAX ML&ldquo;. Jednalo se o samostatně
+použitelnou variantu ML, která byla naprogramována v&nbsp;Pascalu. Překladač do
+strojového kódu VAXu byl dokončen v&nbsp;roce 1981. Prakticky právě od této
+chvíle se začala psát historie skutečně dostupného ML. Ostatně je to patrné i
+na tom, že o rok později byl jazyk portován do Unixu (stále v&nbsp;Pascalu).
+Později byl runtime jazyka přepsán do C, ovšem samotný překladač zůstal
+v&nbsp;Pascalu.</p>
+
+<p>V&nbsp;roce 1983 se autoři programovacího jazyka ML setkali na universitě
+v&nbsp;Edinburgu s&nbsp;cílem formálně jazyk ML specifikovat. Na rozdíl od
+například Pythonu měl být tedy jazyk ML založen na formální definici a nikoli
+na referenční implementaci. Výsledkem tohoto setkání byl popis ML, článek
+&bdquo;Compiling a Functional Language&ldquo; a zhruba v&nbsp;této době se
+namísto ML začalo používat označení <i>Standard ML</i> neboli zkráceně
+<i>SML</i>.</p>
+
+
+
+<p><a name="k04"></a></p>
+<h2 id="k04">4. Ukázky syntaxe a sémantiky programovacího jazyka ML</h2>
+
+<p>Sémantika programovacího jazyka ML měla velký vliv na jazyky CAML, OCaml i
+F#. Syntaxe se sice později poněkud změnila, ale i tak uvidíme, že příbuznost
+těchto jazyků je stále patrná a dokonce je možné některé realizace algoritmů
+beze změny přenést do novějšího jazyka. Pro zajímavost se nyní podívejme na
+způsob implementace výpočtu Fibonacciho posloupnosti v&nbsp;tomto jazyku.
+Nejdříve si ukážeme naivní implementaci výpočtu s&nbsp;využitím rekurze (ovšem
+nikoli optimalizace na základě <i>tail rekurze</i>) v&nbsp;programovacím jazyku
+Standard ML:</p>
+
+<pre>
+<i>(* Naivní implementace výpočtu Fibonacciho posloupnosti *)</i>
+&nbsp;
+fun <strong>fib</strong> n =
+    if n = 0 then 0 else
+    if n = 1 then 1 else
+    fib (n - 1) + fib (n - 2);
+&nbsp;
+&nbsp;
+&nbsp;
+fib 10;
+</pre>
+
+<p>Využít ovšem v&nbsp;tomto případě můžeme i pattern matching (který je
+v&nbsp;jiných jazycích &bdquo;znovuobjevován&ldquo; a mnohdy vývojářské
+veřejnosti představován jako žhavá novinka). Použití pattern matchingu vede
+k&nbsp;elegantnějšímu způsobu zápisu programového kódu:</p>
+
+<pre>
+<i>(* Implementace výpočtu Fibonacciho posloupnosti s využitím pattern matchingu *)</i>
+&nbsp;
+fun <strong>fib</strong> 0 = 0
+  | fib 1 = 1
+  | fib n = fib (n - 1) + fib (n - 2);
+&nbsp;
+&nbsp;
+&nbsp;
+fib 10;
+</pre>
+
+<p>Na obou výše uvedených demonstračních příkladech můžeme vidět syntaxi, která
+je typická pro většinu programovacích jazyků z&nbsp;rodiny ML. Například při
+deklaraci funkce se formální parametry nezapisují do závorek a při volání
+funkce je možné závorky vynechat ve chvíli, kdy je zápis jednoznačný. Taktéž
+zápis pattern matchingu se znakem roury je pro mnoho jazyků z&nbsp;rodiny ML
+typický (ale dále uvidíme, že i on se postupem doby změnil).</p>
+
+<p>A navíc si povšimněte, že i když je ML staticky a navíc i striktně typovaný
+programovací jazyk, není ve funkcích datový typ ve skutečnosti ani jednou
+specifikován! O doplnění datových typů se stará mechanismus známý pod jménem
+<i>type inference</i>, jenž je mimochodem taktéž &bdquo;znovuobjevován&ldquo; a
+jeho slabší variantu nalezneme například v&nbsp;programovacím jazyku Go.</p>
+
+<p>To, že je typový systém jazyka silný, si můžeme ověřit snadno &ndash;
+pokusíme se do funkce <strong>fib</strong> předat nějakou nekorektní
+hodnotu:</p>
+
+<pre>
+fib "www.root.cz";
+Elaboration failed: Type clash. Functions of type "int → int" cannot take an argument of type "string": Cannot merge "int" and "string".
+</pre>
+
+<p>popř.:</p>
+
+<pre>
+<strong>fib 1.5;</strong>
+Elaboration failed: Type clash. Functions of type "int → int" cannot take an argument of type "real": Cannot merge "int" and "real".
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: zde je patrný striktní rozdíl mezi
+celočíselným typem <strong>int</strong> a numerickým typem s&nbsp;plovoucí
+řádovou čárkou <strong>real</strong>.</div></p>
+
+<p>Další ukázka poněkud pokročilejšího pattern matchingu pro rekurzivně zapsaný
+výpočet délky seznamu:</p>
+
+<pre>
+<i>(* Implementace funkce length založená na pattern matchingu *)</i>
+&nbsp; 
+fun <strong>length</strong>([]) = 0
+  | <strong>length</strong>(head::tail) = 1 + <strong>length</strong>(tail);
+</pre>
+
+<p>což lze ještě více zkrátit na:</p>
+
+<pre>
+<i>(* Implementace funkce length založená na pattern matchingu *)</i>
+&nbsp; 
+fun <strong>length</strong>([]) = 0
+  | <strong>length</strong>(_::tail) = 1 + <strong>length</strong>(tail);
+</pre>
+
+<p>Příklad použití této funkce:</p>
+
+<pre>
+<strong>length [];</strong>
+&gt; val it = 0: int;
+&nbsp;
+length [1];
+&gt; val it = 1: int;
+&nbsp;
+<strong>length [1,2,3,4];</strong>
+&gt; val it = 4: int;
+&nbsp;
+<strong>length ["foo", "bar", "baz"];</strong>
+&gt; val it = 3: int;
+</pre>
+
+<p>A pochopitelně i zde je prováděna striktní typová kontrola:</p>
+
+<pre>
+<strong>length "www.root.cz";</strong>
+Elaboration failed: Type clash. Functions of type "'a list → int" cannot take an argument of type "string": Cannot merge "'a list" and "string".
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: tyto demonstrační příklady si můžete
+otestovat i bez instalace Standard ML, a to konkrétně na stránce <a
+href="https://sosml.org/editor">https://sosml.org/editor</a></div></p>
+
+
+
+<p><a name="k05"></a></p>
+<h2 id="k05">5. Další informace o jazyku ML resp.&nbsp;Standard ML</h2>
+
+<p>S&nbsp;programovacím jazykem ML jsme se již na stránkách Rootu seznámili
+v&nbsp;miniseriálu <a
+href="https://www.root.cz/serialy/funkcionalni-programovaci-jazyk-ml/">Funkcionální
+programovací jazyk ML</a>, který měl pouhé tři díly (mj.&nbsp;i kvůli tomu, že
+je tento jazyk pojat poměrně minimalisticky &ndash; například nemá OO systém,
+jeho standardní knihovna je relativně malá atd.):</p>
+
+<ol>
+
+<li>ML &ndash; funkcionální jazyk s revolučním typovým systémem<br />
+<a href="https://www.root.cz/clanky/ml-funkcionalni-jazyk-s-revolucnim-typovym-systemem/">https://www.root.cz/clanky/ml-funkcionalni-jazyk-s-revolucnim-typovym-systemem/</a>
+</li>
+
+<li>Funkce a typový systém programovacího jazyka ML<br />
+<a href="https://www.root.cz/clanky/funkce-a-typovy-system-programovaciho-jazyka-ml/">https://www.root.cz/clanky/funkce-a-typovy-system-programovaciho-jazyka-ml/</a>
+</li>
+
+<li>Curryfikace (currying), výjimky a vlastní operátory v jazyku ML<br />
+<a href="https://www.root.cz/clanky/curryfikace-currying-vyjimky-a-vlastni-operatory-v-jazyku-ml/">https://www.root.cz/clanky/curryfikace-currying-vyjimky-a-vlastni-operatory-v-jazyku-ml/</a>
+</li>
+
+</ol>
+
+<p>Demonstrační příklady napsané v&nbsp;jazyku ML lze najít v&nbsp;repositáři
+<a
+href="https://github.com/tisnik/ml-examples">https://github.com/tisnik/ml-examples</a>.</p>
+
+
+
+<p><a name="k06"></a></p>
+<h2 id="k06">6. Od Standard ML k&nbsp;jazykům Caml a OCaml</h2>
+
+<p>První polovina osmdesátých let minulého století je z&nbsp;hlediska historie
+programovacích jazyků zajímavé období, protože se prakticky &bdquo;všude&ldquo;
+začalo mluvit o objektově orientovaném programování jako o stříbrné kulce,
+která má vyřešit (skoro) všechny programátorské problémy a současně se
+předpokládalo, že právě objektově orientované programování bude paradigmatem
+používaným v&nbsp;budoucnu (což se nakonec ukázal být pravdivý předpoklad, i
+když nakonec zvítězilo &bdquo;třídní OOP&ldquo; a nikoli koncept posílání
+zpráv, tedy původní myšlenka OOP). Ostatně v&nbsp;roce 1983 vzniklo C++,
+v&nbsp;roce 1989 pak C++2.0. Začátek práce na Javě, tedy na dalším široce
+rozšířeném objektově orientovaném jazyku, se datuje do roku 1991, první
+oficiální verze pak byla vydána v&nbsp;roce 1995. A nastoleného tématu se
+chytily i další společnosti, takže například vznikly assemblery podporující
+objektově orientované programování (což v&nbsp;praxi nebyla tak úplně pravda,
+ale na krabici se to pěkně vyjímalo).</p>
+
+<p><div class="rs-tip-major">Poznámka: ostatně nebylo to v&nbsp;IT poprvé ani
+naposledy, kdy se začalo ve všech oblastech hovořit o nějakém novém
+<i>buzzword</i>.</div></p>
+
+<p>V&nbsp;rámci plánů dalších verzí programovacího jazyka ML (přednášky
+ML-2000) se začalo mluvit o podpoře objektově orientovaného programování i
+v&nbsp;tomto jazyce. Nejprve v&nbsp;roce 1985 vznikl programovací jazyk
+<i>Caml</i> resp.&nbsp;psaný i <i>CAML</i> (<i>Categorical Abstract Machine
+Language</i>), jehož poslední verze nabízela OO vrstvu. Na základě zkušeností
+s&nbsp;Camlem byl v&nbsp;roce 1996 vydán programovací jazyk <i>OCaml</i>
+(<i>Objective Caml</i>), jenž je používán dodnes a jemuž se jazyk F# do značné
+míry podobá.</p>
+
+<p><div class="rs-tip-major">Poznámka: mezi jazykem Caml a OCaml můžeme najít
+ještě několik mezistupňů, například Caml Light a Caml Special Light. Na těchto
+projektech pracoval především <a
+href="https://en.wikipedia.org/wiki/Xavier_Leroy">Xavier Leroy</a>, jeden
+z&nbsp;autorů OCamlu.</div></p>
+
+<img src="https://i.iinfo.cz/images/148/f-1-3.png" class="image-1103368" width="182" height="50" alt="&#160;" title="Autor: f# authors, OCaml authors, etc., podle licence: &lt;a href=&quot;http://en.wikipedia.org/wiki/Rights_Managed&quot;&gt;Rights Managed&lt;/a&gt;" />
+<p><i>Obrázek 3: Logo jazyka OCaml (když zvíře míří doprava, jde o OCaml, když
+doleva, tak je to Perl :-)</i></p>
+
+
+
+<p><a name="k07"></a></p>
+<h2 id="k07">7. Ukázky syntaxe a sémantiky programovacího jazyka OCaml</h2>
+
+<p>Opět se podívejme na způsob zápisu algoritmu pro výpočet Fibonacciho
+posloupnosti, tentokrát ovšem nikoli v&nbsp;ML, ale v&nbsp;programovacím jazyku
+<i>OCaml</i>. První verze algoritmu používá rekurzi (ovšem nikoli v&nbsp;tail
+pozici):</p>
+
+<pre>
+let rec fib n =
+  if n &lt; 2 then
+    n
+  else
+    fib (n - 1) + fib (n - 2)
+;;
+&nbsp;
+&nbsp;
+&nbsp;
+fib 10
+</pre>
+
+<p>Druhý příklad je založen na použití pattern matchingu. Zápis se poněkud liší
+od Standard ML, ovšem kostra programu i jeho sémantika zůstala do značné míry
+zachována:</p>
+
+<pre>
+let rec fib = function 
+    0 -&gt; 0
+  | 1 -&gt; 1
+  | n -&gt; fib (n-1) + fib (n-2)
+&nbsp;
+&nbsp;
+&nbsp;
+fib 10
+</pre>
+
+<p>A konečně se podívejme na poněkud složitější implementaci používající tail
+rekurzi, která je překladačem optimalizována do formy programové smyčky:</p>
+
+<pre>
+let fib n =
+  let rec tailr i a b =
+    if i = 0 then a else tailr (pred i) b (a + b)
+  in
+  tailr n 0 1
+&nbsp;
+&nbsp;
+&nbsp;
+fib 10
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: v&nbsp;CAMLu i OCaml se tedy koncept
+funkcí jako plnohodnotných typů naplnil &ndash; již se jedná o
+&bdquo;běžné&ldquo; hodnoty deklarované klíčovým slovem <strong>let</strong> a
+nikoli <strong>fun</strong> (i když toto klíčové slovo je zachováno a používá
+se například pro deklaraci anonymních funkcí).</div></p>
+
+<p>Výše uvedené demonstrační příklady si opět můžete otestovat bez toho, aby
+bylo nutné instalovat ekosystém jazyka OCaml. Postačuje navštívit stránku <a
+href="https://ocaml.org/play">https://ocaml.org/play</a> nebo <a
+href="https://try.ocaml.pro/">https://try.ocaml.pro/</a>. Existuje i
+alternativní webové rozhraní pro OCaml, které naleznete na adrese <a
+href="https://patricoferris.github.io/try-eio/">https://patricoferris.github.io/try-eio/</a>.
+V&nbsp;tomto prostředí se provádí překlad zapsaných zdrojových kódů do
+JavaScriptu.</p>
+
+<a href="https://www.root.cz/obrazek/1103369/"><img src="https://i.iinfo.cz/images/148/f-1-4-prev.png" class="image-1103369" width="370" height="179" data-prev-filename="https://i.iinfo.cz/images/148/f-1-4-prev.png" data-prev-width="370" data-prev-height="179" data-large-filename="https://i.iinfo.cz/images/148/f-1-4-large.png" data-large-width="720" data-large-height="348" alt="&#160;" title="Autor: f# authors, OCaml authors, etc., podle licence: &lt;a href=&quot;http://en.wikipedia.org/wiki/Rights_Managed&quot;&gt;Rights Managed&lt;/a&gt;" /></a>
+<p><i>Obrázek 4: Interaktivní REPL jazyka OCaml.</i></p>
+
+
+
+<p><a name="k08"></a></p>
+<h2 id="k08">8. Od OCamlu k&nbsp;programovacímu jazyku F#</h2>
+
+<p>Programovací jazyk F# vznikl jako výsledek snahy o portaci výše zmíněného
+programovacího jazyka <i>OCaml</i> do ekosystému budovaného okolo platformy
+.NET. Ostatně původně se tento projekt měl jmenovat <i>Caml.NET</i>. Později
+došlo k&nbsp;jeho přejmenování na <i>F#</i>, což odkazuje na jazyk <i>C#</i> i
+na funkcionální prvky jazyků ML/Caml/OCaml/F#. F# byl oproti OCamlu
+v&nbsp;mnoha ohledech rozšířen (což ovšem nemusí být vždy pozitivní směr
+vývoje) a především upraven do takové podoby, aby dokázal dobře kooperovat
+v&nbsp;prostředí .NET, které je objektové a NEfunkcionální.</p>
+
+<a href="https://www.root.cz/obrazek/1103370/"><img src="https://i.iinfo.cz/images/148/f-1-5-prev.png" class="image-1103370" width="249" height="270" data-prev-filename="https://i.iinfo.cz/images/148/f-1-5-prev.png" data-prev-width="249" data-prev-height="270" data-large-filename="https://i.iinfo.cz/images/148/f-1-5-large.png" data-large-width="484" data-large-height="525" alt="&#160;" title="Autor: f# authors, OCaml authors, etc., podle licence: &lt;a href=&quot;http://en.wikipedia.org/wiki/Rights_Managed&quot;&gt;Rights Managed&lt;/a&gt;" /></a>
+<p><i>Obrázek 5: Vývoj jazyka F#.</i></p>
+
+<p><div class="rs-tip-major">Poznámka: ve skutečnosti ovšem nelze říci, že F#
+je nadmnožinou OCaml. Pro některé vlastnosti je to naopak &ndash; F# je
+podmnožinou OCaml s&nbsp;dalšími přidanými vlastnostmi. A společně
+s&nbsp;dalšími vlastnostmi, které se do F# přidávají (light syntaxe apod.) oba
+jazyky divergují.</div></p>
+
+<p>Za vznikem a vývojem Caml.NET a F# stál <a
+href="https://en.wikipedia.org/wiki/Don_Syme">Don Syme</a> a později, společně
+s&nbsp;produktizací jazyka F#, vznikl celý vývojový tým, ovšem vývoj je řízen
+<i>F# Software Foundation</i>.  V&nbsp;následující tabulce jsou vypsány
+jednotlivé verze jazyka F# i s&nbsp;daty vydání těchto verzí:</p>
+
+<table>
+<tr><th>Verze jazyka F#</th><th>Datum vydání verze</th></tr>
+<tr><td>1.x</td><td>Květen 2005</td></tr>
+<tr><td>2.0</td><td>Srpen 2010</td></tr>
+<tr><td>3.0</td><td>Listopad 2012</td></tr>
+<tr><td>3.1</td><td>Listopad 2013</td></tr>
+<tr><td>4.0</td><td>Leden 2016</td></tr>
+<tr><td>4.1</td><td>Březen 2018</td></tr>
+<tr><td>4.5</td><td>Srpen 2018</td></tr>
+<tr><td>4.6</td><td>Březen 2019</td></tr>
+<tr><td>4.7</td><td>Září 2019</td></tr>
+<tr><td>5.0</td><td>Listopad 2020</td></tr>
+<tr><td>6.0</td><td>Listopad 2021</td></tr>
+<tr><td>7.0</td><td>Listopad 2022</td></tr>
+</table>
+
+<p><div class="rs-tip-major">Poznámka: další verzi bychom tedy měli očekávat za
+přibližně tři měsíce.</div></p>
+
+
+
+<p><a name="k09"></a></p>
+<h2 id="k09">9. Jak začít s&nbsp;jazykem F#?</h2>
+
+<p>Jaké programy je nutné nainstalovat v&nbsp;případě, že si budete chtít
+otestovat základní vlastnosti programovacího jazyka F#? V&nbsp;případě, že
+budete chtít plnohodnotnou instalaci F# i dalších nástrojů postavených okolo
+platformy .NET, lze postupovat podle (relativně krátkého) návodu, jenž je
+dostupný na stránkách <a
+href="https://fsharp.org/use/linux/">https://fsharp.org/use/linux/</a>. Po
+instalaci platformy .NET lze spustit jazyk F# v&nbsp;režimu interpretru
+příkazem:</p>
+
+<pre>
+$ <strong>dotnet fsi</strong>
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: pokud důvěřujete skriptům staženým
+z&nbsp;internetu a taktéž důvěřujete software firmy Microsoft, může být
+instalace triviální (jedná se o verzi 6.0.x a nikoli 7.0.x, instalace zabírá
+zhruba 0,5 GB):</div></p>
+
+<pre>
+$ <strong>curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version latest</strong>
+&nbsp;
+dotnet-install: Attempting to download using aka.ms link https://dotnetcli.azureedge.net/dotnet/Sdk/6.0.413/dotnet-sdk-6.0.413-linux-x64.tar.gz
+dotnet-install: Extracting zip from https://dotnetcli.azureedge.net/dotnet/Sdk/6.0.413/dotnet-sdk-6.0.413-linux-x64.tar.gz
+dotnet-install: Installed version is 6.0.413
+dotnet-install: Adding to current process PATH: `/home/tester/.dotnet`. Note: This change will be visible only when sourcing script.
+dotnet-install: Note that the script does not resolve dependencies during installation.
+dotnet-install: To check the list of dependencies, go to https://learn.microsoft.com/dotnet/core/install, select your operating system and check the "Dependencies" section.
+dotnet-install: Installation finished successfully.
+</pre>
+
+<p>Velmi konformní prostředí pro vývoj v&nbsp;programovacím jazyku F# poskytuje
+především <i>Visual Studio Code</i> po instalaci přídavného modulu <a
+href="https://ionide.io/">ionide</a>. Tento projekt, resp.&nbsp;LSP server,
+jenž je jeho součástí (<a
+href="https://ionide.io/Tools/fsac.html">FsAutoComplete</a>), je ovšem možné
+využít například i v&nbsp;programátorských textových editorech Emacs a Vim (což
+si ukážeme v&nbsp;navazujícím článku).</p>
+
+<p>Další možnost spočívá v&nbsp;použití programovacího jazyka F# v&nbsp;Jupyter
+Notebooku, což je projekt, kterým jsme se již na stránkách Roota několikrát
+zabývali, a to konkrétně v&nbsp;těchto článcích [<a
+href="https://www.root.cz/clanky/jupyter-notebook-nastroj-pro-programatory-vyzkumniky-i-lektory/">1</a>]
+[<a
+href="https://www.root.cz/clanky/tvorba-grafu-v-jupyter-notebooku-s-vyuzitim-knihovny-matplotlib/">2</a>]
+[<a
+href="https://www.root.cz/clanky/interaktivni-ovladaci-prvky-v-jupyter-notebooku/">3</a>]
+a [<a
+href="https://www.root.cz/clanky/jupyter-notebook-operace-s-rastrovymi-obrazky-a-uml-diagramy-literate-programming/">4</a>].
+Integrace jazyka F# s&nbsp;Jupyter Notebookem je realizována projektem <a
+href="https://github.com/dotnet/interactive/#jupyter-and-nteract">interactive</a>.</p>
+
+
+
+<p><a name="k10"></a></p>
+<h2 id="k10">10. Pískoviště (playground) pro první seznámení s&nbsp;možnostmi programovacího jazyka</h2>
+
+<p>V&nbsp;následujících dvou kapitolách se seznámíme se dvěma webovými
+&bdquo;pískovišti&ldquo; (<i>playground</i>). Jedná se o prostředí realizované
+(z&nbsp;pohledu uživatele) ve webovém prohlížeči, ovšem na rozdíl od
+plnohodnotných integrovaných vývojových prostředí zde nenalezneme všechny
+v&nbsp;současnosti očekávané vlastnosti (například plnohodnotný debugger atd.).
+Ovšem i přesto jsou pískoviště poměrně často používána, například při výuce
+nebo při zkoušení vlastností programovacích jazyků. S&nbsp;trochou nadsázky je
+možné říci, že podobná pískoviště existují pro prakticky všechny moderní
+programovací jazyky, což je ostatně jen dobře, protože nový jazyk je možné si
+díky tomu velmi snadno a rychle vyzkoušet i bez nutnosti jeho instalace,
+konfigurace, konfigurace vývojového prostředí, konfigurace LSP (<i>Language
+Server Protocol</i>), DAP (<i>Debug Adapter Protocol</i>) atd.  Mezi výhody
+mnoha pískovišť patří i možnost sdílení kódu s&nbsp;dalšími uživateli (většinou
+postačuje pouze sdílet adresu/URL s&nbsp;kódem).</p>
+
+<a href="https://www.root.cz/obrazek/1085814/"><img src="https://i.iinfo.cz/images/315/online-ide-1-5-prev.png" class="image-1085814" data-prev-filename="https://i.iinfo.cz/images/315/online-ide-1-5-prev.png" data-prev-width="355" data-prev-height="270" data-large-filename="https://i.iinfo.cz/images/315/online-ide-1-5-large.png" data-large-width="690" data-large-height="525" alt="&#160;" title="Autor: tisnik, podle licence: &lt;a href=&quot;http://en.wikipedia.org/wiki/Rights_Managed&quot;&gt;Rights Managed&lt;/a&gt;" width="355" height="270" /></a>
+<p><i>Obrázek 6: Prostředí Quite BASICu, které se snaží o reinkarnaci
+klasického BASICU, ovšem ve webovém ekosystému. Jedná se vlastně o poněkud
+sofistikovanější pískoviště.</i></p>
+
+
+
+<p><a name="k11"></a></p>
+<h2 id="k11">11. Webová konzole pro programovací jazyk F#</h2>
+
+<p>Webové rozhraní pískoviště pro programovací jazyk F# je možné nalézt na
+adrese <a href="https://try.fsharp.org/">https://try.fsharp.org/</a>.
+Alternativní pískoviště nalezneme na adrese <a
+href="https://tryfsharp.fsbolero.io/">https://tryfsharp.fsbolero.io/</a>. To
+vypadá následovně (mimochodem je zajímavé, že se zde používá technologie
+WebAssembly):</p>
+
+<a href="https://www.root.cz/obrazek/1085862/"><img src="https://i.iinfo.cz/images/680/online-ide-3-1-prev.png" class="image-1085862" data-prev-filename="https://i.iinfo.cz/images/680/online-ide-3-1-prev.png" data-prev-width="370" data-prev-height="120" data-large-filename="https://i.iinfo.cz/images/680/online-ide-3-1-large.png" data-large-width="720" data-large-height="234" alt="&#160;" title="Autor: tisnik, podle licence: &lt;a href=&quot;http://en.wikipedia.org/wiki/Rights_Managed&quot;&gt;Rights Managed&lt;/a&gt;" width="370" height="120" /></a>
+<p><i>Obrázek 7: Webové prostředí pískoviště pro programovací jazyk
+F#.</i></p>
+
+<p>V&nbsp;porovnání s&nbsp;ostatními pískovišti je pískoviště pro jazyk F#
+vybaveno několika užitečnými technologiemi, které známe z&nbsp;běžných
+plnohodnotných IDE. Především textový editor zabudovaný do pískoviště podporuje
+zvýraznění syntaxe (to chybí například u pískoviště pro programovací jazyk Go),
+ale navíc je podporováno i automatické doplňování kódu, které je kontextové a
+dokonce se u nabízených funkcí zobrazuje i přesná informace o datových typech
+(ona by ostatně byla ostuda, kdyby tato technologie nefungovala zrovna u jazyka
+F#). I z&nbsp;tohoto důvodu se může jednat o stránku vhodnou pro první
+seznámení s&nbsp;F# (pokud se vám například nechce do Linuxu instalovat všechny
+závislosti, které F# ve formě nativní aplikace má).</p>
+
+<a href="https://www.root.cz/obrazek/1085863/"><img src="https://i.iinfo.cz/images/680/online-ide-3-2-prev.png" class="image-1085863" data-prev-filename="https://i.iinfo.cz/images/680/online-ide-3-2-prev.png" data-prev-width="370" data-prev-height="175" data-large-filename="https://i.iinfo.cz/images/680/online-ide-3-2-large.png" data-large-width="720" data-large-height="341" alt="&#160;" title="Autor: tisnik, podle licence: &lt;a href=&quot;http://en.wikipedia.org/wiki/Rights_Managed&quot;&gt;Rights Managed&lt;/a&gt;" width="370" height="175" /></a>
+<p><i>Obrázek 8: Rekurzivní výpočet faktoriálu v&nbsp;programovacím jazyku
+F#.</i></p>
+
+<p><div class="rs-tip-major">Poznámka: většina dále uvedených příkladů je
+spustitelná právě v&nbsp;tomto webovém pískovišti.</div></p>
+
+<a href="https://www.root.cz/obrazek/1085864/"><img src="https://i.iinfo.cz/images/680/online-ide-3-3-prev.png" class="image-1085864" data-prev-filename="https://i.iinfo.cz/images/680/online-ide-3-3-prev.png" data-prev-width="370" data-prev-height="179" data-large-filename="https://i.iinfo.cz/images/680/online-ide-3-3-large.png" data-large-width="720" data-large-height="349" alt="&#160;" title="Autor: tisnik, podle licence: &lt;a href=&quot;http://en.wikipedia.org/wiki/Rights_Managed&quot;&gt;Rights Managed&lt;/a&gt;" width="370" height="179" /></a>
+<p><i>Obrázek 9: Výpočet faktoriálu s&nbsp;využitím koncové rekurze (ta se
+přeloží na programovou smyčku).</i></p>
+
+<a href="https://www.root.cz/obrazek/1085865/"><img src="https://i.iinfo.cz/images/680/online-ide-3-4-prev.png" class="image-1085865" data-prev-filename="https://i.iinfo.cz/images/680/online-ide-3-4-prev.png" data-prev-width="370" data-prev-height="172" data-large-filename="https://i.iinfo.cz/images/680/online-ide-3-4-large.png" data-large-width="720" data-large-height="335" alt="&#160;" title="Autor: tisnik, podle licence: &lt;a href=&quot;http://en.wikipedia.org/wiki/Rights_Managed&quot;&gt;Rights Managed&lt;/a&gt;" width="370" height="172" /></a>
+<p><i>Obrázek 10: Výpočet Mandelbrotovy množiny (kód převzat z&nbsp;Rosetta
+Code).</i></p>
+
+
+
+<p><a name="k12"></a></p>
+<h2 id="k12">12. Univerzální webové prostředí Repl.it a jazyk F#</h2>
+
+<p>Kromě relativně triviálního pískoviště můžeme programovací jazyk F# využít i
+v&nbsp;prakticky plnohodnotném webovém integrovaném prostředí <i>Repl.it</i>,
+které je dostupné na adrese <a
+href="https://replit.com/">https://replit.com/</a>. Jedná se o komerční
+produkt, jenž je však možné používat (i když pochopitelně s&nbsp;omezenými
+funkcemi &ndash; omezeným časem CPU i omezenou spotřebou RAM) zdarma; viz též
+<a href="https://replit.com/pricing">https://replit.com/pricing</a>
+popř.&nbsp;<a
+href="https://docs.replit.com/getting-started/using-replit-free">Using Replit
+for free</a> s&nbsp;podrobnějšími informacemi o omezeních volně dostupné verze.
+Projekt <i>Repl.it</i> sice ve svém názvu obsahuje zkratku REPL, ovšem ve
+skutečnosti jsou podporovány nejenom interpretované jazyky se smyčkou REPL, ale
+i programovací jazyky překládané.</p></p>
+
+<a href="https://www.root.cz/obrazek/1085823/"><img src="https://i.iinfo.cz/images/315/online-ide-1-14-prev.png" class="image-1085823" data-prev-filename="https://i.iinfo.cz/images/315/online-ide-1-14-prev.png" data-prev-width="370" data-prev-height="190" data-large-filename="https://i.iinfo.cz/images/315/online-ide-1-14-large.png" data-large-width="720" data-large-height="370" alt="&#160;" title="Autor: tisnik, podle licence: &lt;a href=&quot;http://en.wikipedia.org/wiki/Rights_Managed&quot;&gt;Rights Managed&lt;/a&gt;" width="370" height="190" /></a>
+<p><i>Obrázek 11: Nastavení základních vlastností webového IDE.</i></p>
+
+<p>V&nbsp;prostředí Repl.it je možné kromě základních věcí (správa projektu,
+editace zdrojových kódů atd.) používat například i debugger popř.&nbsp;provést
+propojení s&nbsp;Gitem (většinou s&nbsp;GitHubem). Ovšem podporovány jsou do
+jisté míry i jednotkové testy, propojení vyvíjené aplikace s&nbsp;databází a
+další operace, o nichž se zmíníme v&nbsp;navazujících kapitolách.</p>
+
+<a href="https://www.root.cz/obrazek/1085824/"><img src="https://i.iinfo.cz/images/315/online-ide-1-15-prev.png" class="image-1085824" data-prev-filename="https://i.iinfo.cz/images/315/online-ide-1-15-prev.png" data-prev-width="370" data-prev-height="204" data-large-filename="https://i.iinfo.cz/images/315/online-ide-1-15-large.png" data-large-width="720" data-large-height="396" alt="&#160;" title="Autor: tisnik, podle licence: &lt;a href=&quot;http://en.wikipedia.org/wiki/Rights_Managed&quot;&gt;Rights Managed&lt;/a&gt;" width="370" height="204" /></a>
+<p><i>Obrázek 12: Vytvoření nového sezení s&nbsp;volbou programovacího jazyka i
+celého ekosystému.</i></p>
+
+<p>Celý mechanismus <i>Repl.it</i> je postaven na obrazech operačních systémů,
+v&nbsp;nichž je vždy nainstalován a otestován jeden z&nbsp;podporovaných
+programovacích jazyků. Díky tomuto mechanismu je poměrně snadné do
+<i>Repl.it</i> přidat podporu pro prakticky libovolný další programovací jazyk
+&ndash; postačuje &bdquo;jen&ldquo; vytvořit příslušný obraz, přidat podporu do
+programátorského editoru, jazyk zaregistrovat, napsat nápovědu atd.
+V&nbsp;současnosti tak toto webové programátorské prostředí poskytuje několik
+desítek <i>odzkoušených</i> programovacích jazyků a další se budou postupně
+přidávat. Ostatně podívejme se na tabulku, v&nbsp;níž jsou podporované jazyky
+vypsány (jen několik z&nbsp;nich se nachází v&nbsp;beta fázi vývoje
+resp.&nbsp;přesněji řečeno nasazení):</p>
+
+<table>
+<tr><td>Clojure</td></tr>
+<tr><td>Haskell</td></tr>
+<tr><td>Kotlin</td></tr>
+<tr><td>QBasic</td></tr>
+<tr><td>Forth</td></tr>
+<tr><td>LOLCODE</td></tr>
+<tr><td>BrainF</td></tr>
+<tr><td>Emoticon</td></tr>
+<tr><td>Bloop</td></tr>
+<tr><td>Unlambda</td></tr>
+<tr><td>CoffeeScript</td></tr>
+<tr><td>Scheme</td></tr>
+<tr><td>APL</td></tr>
+<tr><td>Lua</td></tr>
+<tr><td>Ruby</td></tr>
+<tr><td>Roy</td></tr>
+<tr><td>Python</td></tr>
+<tr><td>Node.js</td></tr>
+<tr><td>JavaScript</td></tr>
+<tr><td>Deno (beta)</td></tr>
+<tr><td>Golang</td></tr>
+<tr><td>C++</td></tr>
+<tr><td>C</td></tr>
+<tr><td>C#</td></tr>
+<tr><td>F#</td></tr>
+<tr><td>HTML, CSS, JS</td></tr>
+<tr><td>Rust</td></tr>
+<tr><td>Swift</td></tr>
+<tr><td>Python (with Turtle)</td></tr>
+<tr><td>Basic</td></tr>
+<tr><td>R</td></tr>
+<tr><td>Bash</td></tr>
+<tr><td>Crystal</td></tr>
+<tr><td>Julia</td></tr>
+<tr><td>Elixir</td></tr>
+<tr><td>Nim</td></tr>
+<tr><td>Dart</td></tr>
+<tr><td>Reason Node.js</td></tr>
+<tr><td>Tcl</td></tr>
+<tr><td>Erlang</td></tr>
+<tr><td>TypeScript</td></tr>
+<tr><td>Pygame</td></tr>
+<tr><td>Love2D
+<tr><td>Emacs Lisp (Elisp)
+<tr><td>PHP Web Server</td></tr>
+<tr><td>SQLite</td></tr>
+<tr><td>Java</td></tr>
+<tr><td>PHP CLI</td></tr>
+<tr><td>Pyxel</td></tr>
+<tr><td>Raku</td></tr>
+<tr><td>Scala</td></tr>
+<tr><td>Nix</td></tr>
+</table>
+
+
+
+<p><a name="k13"></a></p>
+<h2 id="k13">13. Konzole s&nbsp;interpretrem jazyka F# (<i>fsi</i>)</h2>
+
+<p>Vzhledem k&nbsp;tomu, že vývojář používající prostředí <i>Repl.it</i> má
+k&nbsp;dispozici operační systém s&nbsp;interpretrem či překladačem vybraného
+programovacího jazyka, je po technické stránce jednoduché zajistit přístup do
+konzole s&nbsp;interpretrem (resp.&nbsp;přesněji řečeno s&nbsp;plnohodnotnou
+smyčkou REPL &ndash; <i>Read Eval Print Loop</i>). To je velmi užitečné i pro
+jazyk F# a v&nbsp;některých případech tuto konzoli použijeme. Plnohodnotný REPL
+programovacího jazyka F# otevřeme z&nbsp;konzole zadáním příkazu:</p>
+
+<pre>
+<strong>dotnet fsi</strong>
+</pre>
+
+<p>kde <i>fsi</i> znamená <i>F# Interactive</i>. Práce v&nbsp;konzoli je
+jednoduchá a přímočará, jak ukazuje následující příklad:</p>
+
+<a href="https://www.root.cz/obrazek/1103371/"><img src="https://i.iinfo.cz/images/148/f-1-6-prev.png" class="image-1103371" width="341" height="270" data-prev-filename="https://i.iinfo.cz/images/148/f-1-6-prev.png" data-prev-width="341" data-prev-height="270" data-large-filename="https://i.iinfo.cz/images/148/f-1-6-large.png" data-large-width="663" data-large-height="525" alt="&#160;" title="Autor: f# authors, OCaml authors, etc., podle licence: &lt;a href=&quot;http://en.wikipedia.org/wiki/Rights_Managed&quot;&gt;Rights Managed&lt;/a&gt;" /></a>
+<p><i>Obrázek 13: REPL programovacího jazyka F#.</i></p>
+
+<p><div class="rs-tip-major">Poznámka: dejte si pozor na to, že konzole si
+z&nbsp;nějakého důvodu bere relativně mnoho času CPU, což může znamenat, že po
+vás Repl.it bude někdy i jen po několika hodinách práce chtít platbu za nové
+&bdquo;cykly&ldquo;. Z&nbsp;tohoto důvodu může být lepší si později
+nainstalovat .NET i s&nbsp;F# přímo na vašem počítači (pokud se rozhodnete, že
+F# i tento seriál mají nějaký smysl).</div></p>
+
+
+
+<p><a name="k14"></a></p>
+<h2 id="k14">14. Dva základní koncepty, na nichž je jazyk F# postaven: funkce a datové typy</h2>
+
+<p>Jazyk F# patří do rodiny funkcionálních programovacích jazyků, jak již to
+ostatně částečně prozrazuje jeho jméno. A ve funkcionálních programovacích
+jazycích mají funkce stejně plnohodnotný význam, jako jakékoli jiné hodnoty.
+V&nbsp;jazyku F# je neanonymní funkce vytvořena stejně jako jakákoli jiná
+hodnota s&nbsp;využitím klíčového slova <strong>let</strong> (zatímco u jazyka
+ML se používalo klíčové slovo <strong>fun</strong>). Vyzkoušíme si to
+v&nbsp;REPLu jazyka F# (<i>fsi</i>) na definici funkce pojmenované
+<strong>inc</strong>, která bude mít jediný parametr nazvaný
+<strong>x</strong>. V&nbsp;těle funkce se vypočte výraz <strong>x+1</strong>,
+jehož výsledek je současně i návratovou hodnotou funkce:</p>
+
+<pre>
+&gt; <strong>let inc x = x + 1;;</strong>
+&nbsp;
+val inc: x: int -&gt; int
+</pre>
+
+<p>U této funkce je zajímavé především to, že jsme nikde neuvedli typ parametru
+ani typ návratové hodnoty a přesto jazyk F# korektně zjistil, že se jedná o
+funkci <i>int &rarr; int</i> (tedy jediným parametrem je celé číslo a
+návratovou hodnotou je taktéž celé číslo). Přitom se vychází z&nbsp;těla
+funkce, tedy z&nbsp;výrazu <strong>n+1</strong>, což je v&nbsp;jazyku F#
+striktně součet dvou celých čísel.</p>
+
+<a href="https://www.root.cz/obrazek/1103372/"><img src="https://i.iinfo.cz/images/148/f-1-7-prev.png" class="image-1103372" width="370" height="207" data-prev-filename="https://i.iinfo.cz/images/148/f-1-7-prev.png" data-prev-width="370" data-prev-height="207" data-large-filename="https://i.iinfo.cz/images/148/f-1-7-large.png" data-large-width="720" data-large-height="402" alt="&#160;" title="Autor: f# authors, OCaml authors, etc., podle licence: &lt;a href=&quot;http://en.wikipedia.org/wiki/Rights_Managed&quot;&gt;Rights Managed&lt;/a&gt;" /></a>
+<p><i>Obrázek 14: S&nbsp;rostoucí komplexitou kódu roste význam (statického)
+typování. Typová inference v&nbsp;jazyku F# (a ML i OCaml) navíc do značné míry
+snižuje &bdquo;počáteční investice&ldquo; do statického typového
+systému.<br />
+Autor obrázku: https://bravenewgeek.com/go-is-unapologetically-flawed-heres-why-we-use-it/</i></p>
+
+<p>Zavolání takové funkce je REPLu jednoduché:</p>
+
+<pre>
+<strong>inc 10;;</strong>
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: v&nbsp;jazyku ML, z&nbsp;něhož je F#
+odvozen, se používá odlišná syntaxe, ovšem se stejným významem:</div></p>
+
+<pre>
+<strong>fun inc n = n + 1;</strong>
+</pre>
+
+<p>V&nbsp;jazyku F# taktéž existuje klíčové slovo <strong>fun</strong>, ovšem
+na rozdíl od jazyka ML se používá pro definici anonymních funkcí (známé lambda
+výrazy):</p>
+
+<pre>
+&gt; <strong>fun x -&gt; x + 1;;</strong>
+val it: x: int -&gt; int
+</pre>
+
+<p>Předchozí řádek zapsaný uživatelem (tučné písmo) vytvořil anonymní funkci
+(bez jména) a navázal ji na speciální symbol <strong>it</strong>, jenž vždy
+obsahuje výsledek posledního výrazu. To znamená, že anonymní funkci můžeme
+zavolat (a ihned poté ztratit odkaz na ni, protože <strong>it</strong> bude
+navázán na hodnotu 11:</p>
+
+<pre>
+&gt; <strong>it 10;;</strong>
+val it: int = 11
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: vzhledem k&nbsp;tomu, že funkce jsou
+v&nbsp;F# základními stavebními kameny, setkáme se s&nbsp;nimi prakticky všude,
+takže se postupně seznámíme i se všemi důležitými vlastnostmi funkcí (podpora
+uzávěrů atd. atd.).</div></p>
+
+
+
+<p><a name="k15"></a></p>
+<h2 id="k15">15. Explicitní specifikace typu argumentů funkcí</h2>
+
+<p>V&nbsp;případě potřeby je pochopitelně možné explicitně specifikovat typ
+argumentu či argumentů funkce. Syntaxe je v&nbsp;tomto případě jednoduchá
+&ndash; za jméno argumentu (či argumentů) se zapíše dvojtečka a za ní
+požadovaný datový typ. Například můžeme specifikovat, že typ argumentu
+<strong>x</strong> má být hodnota s&nbsp;plovoucí řádovou čárkou, tedy typ
+<strong>float</strong> (a nikoli <strong>int</strong> získaný typovou
+inferencí). Syntaxe zápisu bude v&nbsp;tomto případě vypadat následovně:</p>
+
+<pre>
+&gt; <strong>let inc2 x:float = x + 1;;</strong>
+</pre>
+
+<p>Ovšem jazyk F# nebude spokojený, protože se snažíme o přetypování
+celočíselného výrazu (tedy výrazu, jehož výsledkem je hodnota typu
+<strong>int</strong>) na návratovou hodnotu typu <strong>float</strong>. Mnoho
+typových systémů takové automatické převody povoluje (někdy dokonce i oběma
+směry &ndash; hodně štěstí), ale zde tomu tak není:</p>
+
+<pre>
+&nbsp;
+  let inc2 x:float = x + 1;;
+  ---------------------^
+&nbsp;
+/home/runner/DimgrayOutrageousFlashdrive/stdin(13,22): error FS0043: The type 'float' does not match the type 'int'
+</pre>
+
+<p>Jedno z&nbsp;možných řešení (jedná se však o rozumné řešení?) by mohlo
+vypadat následovně &ndash; změníme druhý operand u operandu &bdquo;+&ldquo;
+tak, aby se jednalo o konstantu typu <strong>float</strong> a nikoli
+<strong>int</strong>. Poté je již vše v&nbsp;pořádku, neboť sčítáme dvě hodnoty
+typu <strong>float</strong>:</p>
+
+<pre>
+&gt; <strong>let inc2 x:float = x + 1.0;;</strong>
+val inc2: x: float -&gt; float
+</pre>
+
+<p>Nově upravenou funkci si můžeme ihned vyzkoušet:</p>
+
+<pre>
+&gt; <strong>inc2 1.0;;</strong>
+val it: float = 2.0
+</pre>
+
+<p>Interpret opět vypíše nejenom hodnotu, ale i její přesný typ (proč je
+hodnota nazvaná <strong>it</strong> se dozvíme příště).</p>
+
+<p><div class="rs-tip-major">Poznámka: někdy může být užitečné se podívat na
+způsob transformace (resp.&nbsp;možná přesněji řečeno transpilace) zdrojového
+kódu z&nbsp;F# do C#, což nám může například napovědět, kde nastaly problémy
+související s&nbsp;datovými typy. V&nbsp;konkrétním případě funkce
+<strong>inc2</strong> vypadá transpřeklad zhruba následovně:</div></p>
+
+<pre>
+using System.Reflection;
+using Microsoft.FSharp.Core;
+&nbsp;
+[assembly: FSharpInterfaceDataVersion(2, 0, 0)]
+[assembly: AssemblyVersion("0.0.0.0")]
+&nbsp;
+[CompilationMapping(SourceConstructFlags.Module)]
+public static class @_
+{
+    public static double inc2(double x)
+    {
+        return x + 1.0;
+    }
+}
+&nbsp;
+namespace &lt;StartupCode$_&gt;
+{
+    internal static class $_
+    {
+    }
+}
+</pre>
+
+
+
+<p><a name="k16"></a></p>
+<h2 id="k16">16. Obsah druhé části seriálu</h2>
+
+<p>Ve druhé části seriálu o programovacím jazyku F# si ukážeme další vlastnosti
+funkcí, protože právě způsob chápání funkcí je jednou z&nbsp;nejdůležitějších
+předností tohoto jazyka (kterým se F# a obecně jazyky z&nbsp;rodiny ML odlišují
+od dalších programovacích jazyků). Taktéž si ukážeme některé další možnosti
+nabízené typovým systémem jazyka F# a podíváme se i na jednu z&nbsp;jeho
+nejsilnějších zbraní &ndash; pattern matching.</p>
+
+
+
+<p><a name="k17"></a></p>
+<h2 id="k17">17. Seriál o OCaml &ndash; async v&nbsp;praxi?</h2>
+
+<p><a href="#k08">V&nbsp;osmé kapitole</a> jsme si řekli, že jazyk F# původně
+vycházel přímo z&nbsp;programovacího jazyka OCaml. Později se sice cesty obou
+jazyků poněkud rozešly (F# musel lépe kooperovat s&nbsp;prostředím .NET, což si
+vyžádalo ústupky), ovšem stále mají mnoho společného. A zdá se, že na Rootu je
+mezi čtenáři poptávka po obou jazycích, takže si vyzkoušejme malý pokus. Vždy
+po článku o nějaké vlastnosti či vlastnostech programovacího jazyka F# vyjde
+stručnější článek, který ukáže podobný koncept, ovšem upravený pro OCaml
+(později budou ovšem články nutně divergovat). Navazující úvodní článek o OCaml
+bude skutečně stručný (protože vše již bylo řečeno zde :-) &ndash; ukážeme si
+jeho instalaci, nastavení interaktivního prostředí <i>utop</i> atd.</p>
+
+
+
+<p><a name="k18"></a></p>
+<h2 id="k18">18. Repositář s&nbsp;demonstračními příklady</h2>
+
+<p>Všechny výše popsané demonstrační příklady byly uloženy do repositáře
+dostupného na adrese <a
+href="https://github.com/tisnik/f-sharp-examples/">https://github.com/tisnik/f-sharp-examples/</a>.
+V&nbsp;tabulce umístěné pod tímto odstavcem jsou uvedeny odkazy na tyto
+příklady:</p>
+
+<table>
+<tr><th> #</th><th>Příklad</th><th>Popis příkladu</th><th>Cesta</th></tr>
+<tr><td> 1</td><td>ML/fib_recursive.ml</td><td>výpočet hodnoty z&nbsp;Fibonacciho posloupnosti rekurzivně</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/ML/fib_recursive.ml">https://github.com/tisnik/f-sharp-examples/tree/master/ML/fib_recursive.ml</a></td></tr>
+<tr><td> 2</td><td>ML/fib_pattern_matching.ml</td><td>výpočet hodnoty z&nbsp;Fibonacciho posloupnosti založený na pattern matchingu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/ML/fib_pattern_matching.ml">https://github.com/tisnik/f-sharp-examples/tree/master/ML/fib_pattern_matching.ml</a></td></tr>
+<tr><td> 3</td><td>ML/len_pattern_matching_1.ml</td><td>výpočet délky seznamu založený na pattern matchingu (první varianta)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/ML/len_pattern_matching_1.ml">https://github.com/tisnik/f-sharp-examples/tree/master/ML/len_pattern_matching_1.ml</a></td></tr>
+<tr><td> 4</td><td>ML/len_pattern_matching_2.ml</td><td>výpočet délky seznamu založený na pattern matchingu (zkrácená varianta)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/ML/len_pattern_matching_2.ml">https://github.com/tisnik/f-sharp-examples/tree/master/ML/len_pattern_matching_2.ml</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td> 5</td><td>OCaml/fib_recursive.ml</td><td>výpočet hodnoty z&nbsp;Fibonacciho posloupnosti rekurzivně</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/OCaml/fib_recursive.ml">https://github.com/tisnik/f-sharp-examples/tree/master/OCaml/fib_recursive.ml</a></td></tr>
+<tr><td> 6</td><td>OCaml/fib_tail_recursive.ml</td><td>výpočet hodnoty z&nbsp;Fibonacciho posloupnosti s&nbsp;využitím koncové rekurze</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/OCaml/fib_tail_recursive.ml">https://github.com/tisnik/f-sharp-examples/tree/master/OCaml/fib_tail_recursive.ml</a></td></tr>
+<tr><td> 7</td><td>OCaml/fib_pattern_matching.ml</td><td>výpočet hodnoty z&nbsp;Fibonacciho posloupnosti založený na pattern matchingu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/OCaml/fib_pattern_matching.ml">https://github.com/tisnik/f-sharp-examples/tree/master/OCaml/fib_pattern_matching.ml</a></td></tr>
+<tr><td> 8</td><td>OCaml/local_binding.ml</td><td>symbol lokální uvnitř funkce</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/OCaml/local_binding.ml">https://github.com/tisnik/f-sharp-examples/tree/master/OCaml/local_binding.ml</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td> 9</td><td>article_01/function.fs</td><td>deklarace pojmenované funkce</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_01/function.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_01/function.fs</a></td></tr>
+<tr><td>10</td><td>article_01/lambda.fs</td><td>deklarace anonymní funkce</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_01/lambda.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_01/lambda.fs</a></td></tr>
+<tr><td>11</td><td>article_01/local_binding_1.fs</td><td>lokální symboly ve funkci</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_01/local_binding_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_01/local_binding_1.fs</a></td></tr>
+<tr><td>12</td><td>article_01/local_binding_2.fs</td><td>lokální symboly ve funkci</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_01/local_binding_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_01/local_binding_2.fs</a></td></tr>
+<tr><td>13</td><td>article_01/function_type_1.fs</td><td>explicitní definice návratového typu funkce (korektní)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_01/function_type_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_01/function_type_1.fs</a></td></tr>
+<tr><td>14</td><td>article_01/function_type_2.fs</td><td>explicitní definice návratového typu funkce (nekorektní)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_01/function_type_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_01/function_type_2.fs</a></td></tr>
+</table>
+
+
+
+<p><a name="k19"></a></p>
+<h2 id="k19">19. Literatura</h2>
+
+<p><div class="rs-tip-major">Poznámka: v&nbsp;této kapitole jsou uvedeny knihy
+o jazyku ML resp.&nbsp;Standard ML i knihy o programovacím jazyku OCaml, který
+ze Standard ML ze značné míry vychází. A samozřejmě nezapomeneme ani na knihy o
+jazyku F#:</div></p>
+
+<ol>
+
+<li>Get Programming with F#<br />
+<a href="https://www.manning.com/books/get-programming-with-f-sharp">https://www.manning.com/books/get-programming-with-f-sharp</a>
+</li>
+
+<li>F# for Scientists<br />
+<a href="https://www.amazon.com/F-Scientists-Jon-Harrop-ebook/dp/B005PS97RO">https://www.amazon.com/F-Scientists-Jon-Harrop-ebook/dp/B005PS97RO</a>
+</li>
+
+<li>Domain Modeling Made Functional<br />
+<a href="https://fsharpforfunandprofit.com/books/">https://fsharpforfunandprofit.com/books/</a>
+</li>
+
+<li>Functional Programming with F# (na Overleaf, tedy i se zdrojovými kódy)<br />
+<a href="https://www.overleaf.com/project/5bf2cb3cd9568d5a75bfcba9">https://www.overleaf.com/project/5bf2cb3cd9568d5a75bfcba9</a>
+</li>
+
+<li>Book of F#<br />
+<a href="https://nostarch.com/fsharp">https://nostarch.com/fsharp</a>
+</li>
+
+<li>F# Programming (Wikibook)<br />
+<a href="https://en.wikibooks.org/wiki/F_Sharp_Programming">https://en.wikibooks.org/wiki/F_Sharp_Programming</a>
+</li>
+
+<li>Stylish F#: Crafting Elegant Functional Code for .NET and .NET Core<br />
+<a href="https://www.amazon.com/dp/1484239997/">https://www.amazon.com/dp/1484239997/</a>
+</li>
+
+<li>ML for the Working Programmer<br />
+<a href="https://www.cl.cam.ac.uk/~lp15/MLbook/pub-details.html">https://www.cl.cam.ac.uk/~lp15/MLbook/pub-details.html</a>
+</li>
+
+<li>Elements of ML Programming, 2nd Edition (ML97)<br />
+<a href="http://infolab.stanford.edu/~ullman/emlp.html">http://infolab.stanford.edu/~ullman/emlp.html</a>
+</li>
+
+<li>A tour of Standard ML<br />
+<a href="https://saityi.github.io/sml-tour/tour/welcome">https://saityi.github.io/sml-tour/tour/welcome</a>
+</li>
+
+<li>The History of Standard ML<br />
+<a href="https://smlfamily.github.io/history/SML-history.pdf">https://smlfamily.github.io/history/SML-history.pdf</a>
+</li>
+
+<li>The Standard ML Basis Library<br />
+<a href="https://smlfamily.github.io/Basis/">https://smlfamily.github.io/Basis/</a>
+</li>
+
+<li>Programming in Standard ML<br />
+<a href="http://www.cs.cmu.edu/~rwh/isml/book.pdf">http://www.cs.cmu.edu/~rwh/isml/book.pdf</a>
+</li>
+
+<li>Programming in Standard ML '97: A Tutorial Introduction<br />
+<a href="http://www.lfcs.inf.ed.ac.uk/reports/97/ECS-LFCS-97-364/">http://www.lfcs.inf.ed.ac.uk/reports/97/ECS-LFCS-97-364/</a>
+</li>
+
+<li>Programming in Standard ML '97: An On-line Tutorial<br />
+<a href="https://homepages.inf.ed.ac.uk/stg/NOTES/">https://homepages.inf.ed.ac.uk/stg/NOTES/</a>
+</li>
+
+<li>The OCaml system  release 4.13<br />
+<a href="https://ocaml.org/releases/4.13/htmlman/index.html">https://ocaml.org/releases/4.13/htmlman/index.html</a>
+</li>
+
+<li>Real World OCaml: Functional programming for the masses<br />
+<a href="https://dev.realworldocaml.org/">https://dev.realworldocaml.org/</a>
+</li>
+
+<li>OCaml from the Very Beginning<br />
+<a href="http://ocaml-book.com/">http://ocaml-book.com/</a>
+</li>
+
+<li>OCaml from the Very Beginning: More OCaml : Algorithms, Methods &amp; Diversions<br />
+<a href="http://ocaml-book.com/more-ocaml-algorithms-methods-diversions/">http://ocaml-book.com/more-ocaml-algorithms-methods-diversions/</a>
+</li>
+
+<li>Unix system programming in OCaml<br />
+<a href="http://ocaml.github.io/ocamlunix/">http://ocaml.github.io/ocamlunix/</a>
+</li>
+
+<li>OCaml for Scientists<br />
+<a href="https://www.ffconsultancy.com/products/ocaml_for_scientists/index.html">https://www.ffconsultancy.com/products/ocaml_for_scientists/index.html</a>
+</li>
+
+<li>Using, Understanding, and Unraveling The OCaml Language<br />
+<a href="https://caml.inria.fr/pub/docs/u3-ocaml/">https://caml.inria.fr/pub/docs/u3-ocaml/</a>
+</li>
+
+<li>Developing Applications With objective Caml<br />
+<a href="https://caml.inria.fr/pub/docs/oreilly-book/index.html">https://caml.inria.fr/pub/docs/oreilly-book/index.html</a>
+</li>
+
+<li>Introduction to Objective Caml<br />
+<a href="http://courses.cms.caltech.edu/cs134/cs134b/book.pdf">http://courses.cms.caltech.edu/cs134/cs134b/book.pdf</a>
+</li>
+
+<li>How to Think Like a (Functional) Programmer<br />
+<a href="https://greenteapress.com/thinkocaml/index.html">https://greenteapress.com/thinkocaml/index.html</a>
+</li>
+
+</ol>
+
+
+
+<p><a name="k20"></a></p>
+<h2 id="k20">20. Odkazy na Internetu</h2>
+
+<ol>
+
+<li>General-Purpose, Industrial-Strength, Expressive, and Safe<br />
+<a href="https://ocaml.org/">https://ocaml.org/</a>
+</li>
+
+<li>OCaml playground<br />
+<a href="https://ocaml.org/play">https://ocaml.org/play</a>
+</li>
+
+<li>Online Ocaml Compiler IDE<br />
+<a href="https://www.jdoodle.com/compile-ocaml-online/">https://www.jdoodle.com/compile-ocaml-online/</a>
+</li>
+
+<li>Get Started - OCaml<br />
+<a href="https://www.ocaml.org/docs">https://www.ocaml.org/docs</a>
+</li>
+
+<li>Get Up and Running With OCaml<br />
+<a href="https://www.ocaml.org/docs/up-and-running">https://www.ocaml.org/docs/up-and-running</a>
+</li>
+
+<li>Better OCaml (Online prostředí)<br />
+<a href="https://betterocaml.ml/?version=4.14.0">https://betterocaml.ml/?version=4.14.0</a>
+</li>
+
+<li>OCaml file extensions<br />
+<a href="https://blog.waleedkhan.name/ocaml-file-extensions/">https://blog.waleedkhan.name/ocaml-file-extensions/</a>
+</li>
+
+<li>First thoughts on Rust vs OCaml<br />
+<a href="https://blog.darklang.com/first-thoughts-on-rust-vs-ocaml/">https://blog.darklang.com/first-thoughts-on-rust-vs-ocaml/</a>
+</li>
+
+<li>Standard ML of New Jersey<br />
+<a href="https://www.smlnj.org/">https://www.smlnj.org/</a>
+</li>
+
+<li>Programming Languages: Standard ML - 1 (a navazující videa)<br />
+<a href="https://www.youtube.com/watch?v=2sqjUWGGzTo">https://www.youtube.com/watch?v=2sqjUWGGzTo</a>
+</li>
+
+<li>6 Excellent Free Books to Learn Standard ML<br />
+<a href="https://www.linuxlinks.com/excellent-free-books-learn-standard-ml/">https://www.linuxlinks.com/excellent-free-books-learn-standard-ml/</a>
+</li>
+
+<li>SOSML: The Online Interpreter for Standard ML<br />
+<a href="https://sosml.org/">https://sosml.org/</a>
+</li>
+
+<li>ML (Computer program language)<br />
+<a href="https://www.barnesandnoble.com/b/books/other-programming-languages/ml-computer-program-language/_/N-29Z8q8Zvy7">https://www.barnesandnoble.com/b/books/other-programming-languages/ml-computer-program-language/_/N-29Z8q8Zvy7</a>
+</li>
+
+<li>Strong Typing<br />
+<a href="https://perl.plover.com/yak/typing/notes.html">https://perl.plover.com/yak/typing/notes.html</a>
+</li>
+
+<li>What to know before debating type systems<br />
+<a href="http://blogs.perl.org/users/ovid/2010/08/what-to-know-before-debating-type-systems.html">http://blogs.perl.org/users/ovid/2010/08/what-to-know-before-debating-type-systems.html</a>
+</li>
+
+<li>Types, and Why You Should Care (Youtube)<br />
+<a href="https://www.youtube.com/watch?v=0arFPIQatCU">https://www.youtube.com/watch?v=0arFPIQatCU</a>
+</li>
+
+<li>DynamicTyping (Martin Fowler)<br />
+<a href="https://www.martinfowler.com/bliki/DynamicTyping.html">https://www.martinfowler.com/bliki/DynamicTyping.html</a>
+</li>
+
+<li>DomainSpecificLanguage (Martin Fowler)<br />
+<a href="https://www.martinfowler.com/bliki/DomainSpecificLanguage.html">https://www.martinfowler.com/bliki/DomainSpecificLanguage.html</a>
+</li>
+
+<li>Language Workbenches: The Killer-App for Domain Specific Languages?<br />
+<a href="https://www.martinfowler.com/articles/languageWorkbench.html">https://www.martinfowler.com/articles/languageWorkbench.html</a>
+</li>
+
+<li>Effective ML (Youtube)<br />
+<a href="https://www.youtube.com/watch?v=-J8YyfrSwTk">https://www.youtube.com/watch?v=-J8YyfrSwTk</a>
+</li>
+
+<li>Why OCaml (Youtube)<br />
+<a href="https://www.youtube.com/watch?v=v1CmGbOGb2I">https://www.youtube.com/watch?v=v1CmGbOGb2I</a>
+</li>
+
+<li>CSE 341: Functions and patterns<br />
+<a href="https://courses.cs.washington.edu/courses/cse341/04wi/lectures/03-ml-functions.html">https://courses.cs.washington.edu/courses/cse341/04wi/lectures/03-ml-functions.html</a>
+</li>
+
+<li>Comparing Objective Caml and Standard ML<br />
+<a href="http://adam.chlipala.net/mlcomp/">http://adam.chlipala.net/mlcomp/</a>
+</li>
+
+<li>What are the key differences between Standard ML and OCaml?<br />
+<a href="https://www.quora.com/What-are-the-key-differences-between-Standard-ML-and-OCaml?share=1">https://www.quora.com/What-are-the-key-differences-between-Standard-ML-and-OCaml?share=1</a>
+</li>
+
+<li>Cheat Sheets (pro OCaml)<br />
+<a href="https://www.ocaml.org/docs/cheat_sheets.html">https://www.ocaml.org/docs/cheat_sheets.html</a>
+</li>
+
+<li>Syllabus (FAS CS51)<br />
+<a href="https://cs51.io/college/syllabus/">https://cs51.io/college/syllabus/</a>
+</li>
+
+<li>Abstraction and Design In Computation<br />
+<a href="http://book.cs51.io/">http://book.cs51.io/</a>
+</li>
+
+<li>Learn X in Y minutes Where X=Standard ML<br />
+<a href="https://learnxinyminutes.com/docs/standard-ml/">https://learnxinyminutes.com/docs/standard-ml/</a>
+</li>
+
+<li>CSE307 Online - Summer 2018: Principles of Programing Languages course<br />
+<a href="https://www3.cs.stonybrook.edu/~pfodor/courses/summer/cse307.html">https://www3.cs.stonybrook.edu/~pfodor/courses/summer/cse307.html</a>
+</li>
+
+<li>CSE307 Principles of Programming Languages course: SML part 1<br />
+<a href="https://www.youtube.com/watch?v=p1n0_PsM6hw">https://www.youtube.com/watch?v=p1n0_PsM6hw</a>
+</li>
+
+<li>CSE 307 &ndash; Principles of Programming Languages &ndash; SML<br />
+<a href="https://www3.cs.stonybrook.edu/~pfodor/courses/summer/CSE307/L01_SML.pdf">https://www3.cs.stonybrook.edu/~pfodor/courses/summer/CSE307/L01_SML.pdf</a>
+</li>
+
+<li>SML, Some Basic Examples<br />
+<a href="https://cs.fit.edu/~ryan/sml/intro.html">https://cs.fit.edu/~ryan/sml/intro.html</a>
+</li>
+
+<li>History of programming languages<br />
+<a href="https://devskiller.com/history-of-programming-languages/">https://devskiller.com/history-of-programming-languages/</a>
+</li>
+
+<li>History of programming languages (Wikipedia)<br />
+<a href="https://en.wikipedia.org/wiki/History_of_programming_languages">https://en.wikipedia.org/wiki/History_of_programming_languages</a>
+</li>
+
+<li>Jemný úvod do rozsáhlého světa jazyků LISP a Scheme<br />
+<a href="https://www.root.cz/clanky/jemny-uvod-do-rozsahleho-sveta-jazyku-lisp-a-scheme/">https://www.root.cz/clanky/jemny-uvod-do-rozsahleho-sveta-jazyku-lisp-a-scheme/</a>
+</li>
+
+<li>The Evolution Of Programming Languages<br />
+<a href="https://www.i-programmer.info/news/98-languages/8809-the-evolution-of-programming-languages.html">https://www.i-programmer.info/news/98-languages/8809-the-evolution-of-programming-languages.html</a>
+</li>
+
+<li>Evoluce programovacích jazyků<br />
+<a href="https://ccrma.stanford.edu/courses/250a-fall-2005/docs/ComputerLanguagesChart.png">https://ccrma.stanford.edu/courses/250a-fall-2005/docs/ComputerLanguagesChart.png</a>
+</li>
+
+<li>Poly/ML Homepage<br />
+<a href="https://polyml.org/">https://polyml.org/</a>
+</li>
+
+<li>PolyConf 16: A brief history of F# / Rachel Reese<br />
+<a href="https://www.youtube.com/watch?v=cbDjpi727aY">https://www.youtube.com/watch?v=cbDjpi727aY</a>
+</li>
+
+<li>Programovací jazyk Clojure 18: základní techniky optimalizace aplikací<br />
+<a href="https://www.root.cz/clanky/programovaci-jazyk-clojure-18-zakladni-techniky-optimalizace-aplikaci/">https://www.root.cz/clanky/programovaci-jazyk-clojure-18-zakladni-techniky-optimalizace-aplikaci/</a>
+</li>
+
+<li>Moscow ML Language Overview<br />
+<a href="https://itu.dk/people/sestoft/mosml/mosmlref.pdf">https://itu.dk/people/sestoft/mosml/mosmlref.pdf</a>
+</li>
+
+<li>ForLoops<br />
+<a href="http://mlton.org/ForLoops">http://mlton.org/ForLoops</a>
+</li>
+
+<li>Funkcionální dobrodružství v&nbsp;JavaScriptu<br />
+<a href="https://blog.kolman.cz/2015/12/funkcionalni-dobrodruzstvi-v-javascriptu.html">https://blog.kolman.cz/2015/12/funkcionalni-dobrodruzstvi-v-javascriptu.html</a>
+</li>
+
+<li>Recenze knihy Functional Thinking (Paradigm over syntax)<br />
+<a href="https://www.root.cz/clanky/recenze-knihy-functional-thinking-paradigm-over-syntax/">https://www.root.cz/clanky/recenze-knihy-functional-thinking-paradigm-over-syntax/</a>
+</li>
+
+<li>Currying<br />
+<a href="https://sw-samuraj.cz/2011/02/currying/">https://sw-samuraj.cz/2011/02/currying/</a>
+</li>
+
+<li>Používání funkcí v&nbsp;F#<br />
+<a href="https://docs.microsoft.com/cs-cz/dotnet/fsharp/tutorials/using-functions">https://docs.microsoft.com/cs-cz/dotnet/fsharp/tutorials/using-functions</a>
+</li>
+
+<li>Funkce vyššího řádu<br />
+<a href="http://naucte-se.haskell.cz/funkce-vyssiho-radu">http://naucte-se.haskell.cz/funkce-vyssiho-radu</a>
+</li>
+
+<li>Currying (Wikipedia)<br />
+<a href="https://en.wikipedia.org/wiki/Currying">https://en.wikipedia.org/wiki/Currying</a>
+</li>
+
+<li>Currying (Haskell wiki)<br />
+<a href="https://wiki.haskell.org/Currying">https://wiki.haskell.org/Currying</a>
+</li>
+
+<li>Haskell Curry<br />
+<a href="https://en.wikipedia.org/wiki/Haskell_Curry">https://en.wikipedia.org/wiki/Haskell_Curry</a>
+</li>
+
+<li>Moses Schönfinkel<br />
+<a href="https://en.wikipedia.org/wiki/Moses_Sch%C3%B6nfinkel">https://en.wikipedia.org/wiki/Moses_Sch%C3%B6nfinkel</a>
+</li>
+
+<li>.NET framework<br />
+<a href="https://dotnet.microsoft.com/en-us/">https://dotnet.microsoft.com/en-us/</a>
+</li>
+
+<li>F# - .NET Blog<br />
+<a href="https://devblogs.microsoft.com/dotnet/category/fsharp/">https://devblogs.microsoft.com/dotnet/category/fsharp/</a>
+</li>
+
+<li>Playground: OCaml<br />
+<a href="https://ocaml.org/play">https://ocaml.org/play</a>
+</li>
+
+<li>The F# Survival Guide<br />
+<a href="https://web.archive.org/web/20110715231625/http://www.ctocorner.com/fsharp/book/default.aspx">https://web.archive.org/web/20110715231625/http://www.ctocorner.com/fsharp/book/default.aspx</a>
+</li>
+
+<li>Object-Oriented Programming — The Trillion Dollar Disaster<br />
+<a href="https://betterprogramming.pub/object-oriented-programming-the-trillion-dollar-disaster-92a4b666c7c7">https://betterprogramming.pub/object-oriented-programming-the-trillion-dollar-disaster-92a4b666c7c7</a>
+</li>
+
+<li>Goodbye, Object Oriented Programming<br />
+<a href="https://cscalfani.medium.com/goodbye-object-oriented-programming-a59cda4c0e53">https://cscalfani.medium.com/goodbye-object-oriented-programming-a59cda4c0e53</a>
+</li>
+
+<li>So You Want to be a Functional Programmer (Part 1)<br />
+<a href="https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-1-1f15e387e536">https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-1-1f15e387e536</a>
+</li>
+
+<li>So You Want to be a Functional Programmer (Part 2)<br />
+<a href="https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-2-7005682cec4a">https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-2-7005682cec4a</a>
+</li>
+
+<li>So You Want to be a Functional Programmer (Part 3)<br />
+<a href="https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-3-1b0fd14eb1a7">https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-3-1b0fd14eb1a7</a>
+</li>
+
+<li>So You Want to be a Functional Programmer (Part 4)<br />
+<a href="https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-4-18fbe3ea9e49">https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-4-18fbe3ea9e49</a>
+</li>
+
+<li>So You Want to be a Functional Programmer (Part 5)<br />
+<a href="https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-5-c70adc9cf56a">https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-5-c70adc9cf56a</a>
+</li>
+
+<li>So You Want to be a Functional Programmer (Part 6)<br />
+<a href="https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-6-db502830403">https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-6-db502830403</a>
+</li>
+
+<li>Why Programmers Need Limits<br />
+<a href="https://cscalfani.medium.com/why-programmers-need-limits-3d96e1a0a6db">https://cscalfani.medium.com/why-programmers-need-limits-3d96e1a0a6db</a>
+</li>
+
+<li>Signatures<br />
+<a href="https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/signature-files">https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/signature-files</a>
+</li>
+
+<li>F# for Linux People<br />
+<a href="https://carpenoctem.dev/blog/fsharp-for-linux-people/">https://carpenoctem.dev/blog/fsharp-for-linux-people/</a>
+</li>
+
+<li>Ionide project<br />
+<a href="https://ionide.io/">https://ionide.io/</a>
+</li>
+
+<li>FsAutoComplete<br />
+<a href="https://ionide.io/Tools/fsac.html">https://ionide.io/Tools/fsac.html</a>
+</li>
+
+<li>Interactive (.NET for Jupyter Notebook)<br />
+<a href="https://github.com/dotnet/interactive/#jupyter-and-nteract">https://github.com/dotnet/interactive/#jupyter-and-nteract</a>
+</li>
+
+<li>let Bindings<br />
+<a href="https://github.com/dotnet/docs/blob/main/docs/fsharp/language-reference/functions/let-bindings.md">https://github.com/dotnet/docs/blob/main/docs/fsharp/language-reference/functions/let-bindings.md</a>
+</li>
+
+<li>Lambda Expressions: The fun Keyword (F#)<br />
+<a href="https://github.com/dotnet/docs/blob/main/docs/fsharp/language-reference/functions/lambda-expressions-the-fun-keyword.md">https://github.com/dotnet/docs/blob/main/docs/fsharp/language-reference/functions/lambda-expressions-the-fun-keyword.md</a>
+</li>
+
+<li>Infographic showing code complexity vs developer experience<br />
+<a href="https://twitter.com/rossipedia/status/1580639227313676288">https://twitter.com/rossipedia/status/1580639227313676288</a>
+</li>
+
+<li>OCaml for the Masses: Why the next language you learn should be functional<br />
+<a href="https://queue.acm.org/detail.cfm?id=2038036">https://queue.acm.org/detail.cfm?id=2038036</a>
+</li>
+
+<li>Try EIO<br />
+<a href="https://patricoferris.github.io/try-eio/">https://patricoferris.github.io/try-eio/</a>
+</li>
+
+<li>Try OCaml<br />
+<a href="https://try.ocaml.pro/">https://try.ocaml.pro/</a>
+</li>
+
+<li>ML &ndash; funkcionální jazyk s revolučním typovým systémem<br />
+<a href="https://www.root.cz/clanky/ml-funkcionalni-jazyk-s-revolucnim-typovym-systemem/">https://www.root.cz/clanky/ml-funkcionalni-jazyk-s-revolucnim-typovym-systemem/</a>
+</li>
+
+<li>Funkce a typový systém programovacího jazyka ML<br />
+<a href="https://www.root.cz/clanky/funkce-a-typovy-system-programovaciho-jazyka-ml/">https://www.root.cz/clanky/funkce-a-typovy-system-programovaciho-jazyka-ml/</a>
+</li>
+
+<li>Curryfikace (currying), výjimky a vlastní operátory v jazyku ML<br />
+<a href="https://www.root.cz/clanky/curryfikace-currying-vyjimky-a-vlastni-operatory-v-jazyku-ml/">https://www.root.cz/clanky/curryfikace-currying-vyjimky-a-vlastni-operatory-v-jazyku-ml/</a>
+</li>
+
+<li>Operátor J (Wikipedia)<br />
+<a href="https://en.wikipedia.org/wiki/J_operator">https://en.wikipedia.org/wiki/J_operator</a>
+</li>
+
+<li>Standard ML (Wikipedia)<br />
+<a href="https://en.wikipedia.org/wiki/Standard_ML">https://en.wikipedia.org/wiki/Standard_ML</a>
+</li>
+
+<li>Don Syme<br />
+<a href="https://en.wikipedia.org/wiki/Don_Syme">https://en.wikipedia.org/wiki/Don_Syme</a>
+</li>
+
+<li>Python to OCaml: Retrospective<br />
+<a href="http://roscidus.com/blog/blog/2014/06/06/python-to-ocaml-retrospective/">http://roscidus.com/blog/blog/2014/06/06/python-to-ocaml-retrospective/</a>
+</li>
+
+<li>Xavier Leroy<br />
+<a href="https://en.wikipedia.org/wiki/Xavier_Leroy">https://en.wikipedia.org/wiki/Xavier_Leroy</a>
+</li>
+
+</ol>
+
+
+
+<p></p><p></p>
+<p><small>Autor: <a href="http://www.fit.vutbr.cz/~tisnovpa">Pavel Tišnovský</a> &nbsp; 2023</small></p>
+</body>
+</html>
