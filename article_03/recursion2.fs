@@ -5,4 +5,4 @@ let rec fib n =
     fib (n - 1) + fib (n - 2)
 ;;
 
-Printf.printf "%d" (fib 10)
+printf "%d" (fib 10)
