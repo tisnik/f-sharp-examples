@@ -4,4 +4,4 @@ let fib n =
   in
   tailr n 0 1;;
 
-Printf.printf "%d" (fib 10)
+printf "%d" (fib 10)
