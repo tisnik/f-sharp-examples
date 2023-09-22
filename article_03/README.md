@@ -1,7 +1,7 @@
 ## Content of `article_03` subdirectory
 
 Examples written in F# that are used in the following article:
-[]()
+[Rekurze a pattern matching v programovacím jazyku F#](https://www.root.cz/clanky/rekurze-a-pattern-matching-v-programovacim-jazyku-f/)
 
 - fibonacci1.fs
 - fibonacci2.fs
