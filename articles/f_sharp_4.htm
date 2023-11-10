@@ -1,0 +1,1375 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>Práce se seznamy v jazyce F#</title>
+<meta name="Author" content="Pavel Tisnovsky" />
+<meta name="Generator" content="vim" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<style type="text/css">
+         body {color:#000000; background:#ffffff;}
+         h1  {font-family: arial, helvetica, sans-serif; color:#ffffff; background-color:#c00000; text-align:center; padding-left:1em}
+         h2  {font-family: arial, helvetica, sans-serif; color:#ffffff; background-color:#0000c0; padding-left:1em; text-align:left}
+         h3  {font-family: arial, helvetica, sans-serif; color:#000000; background-color:#c0c0c0; padding-left:1em; text-align:left}
+         h4  {font-family: arial, helvetica, sans-serif; color:#000000; background-color:#e0e0e0; padding-left:1em; text-align:left}
+         a   {font-family: arial, helvetica, sans-serif;}
+         li  {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify; width:450px;}
+         ol  {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify; width:450px;}
+         ul  {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify; width:450px;}
+         p   {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify;}
+         pre {background:#e0e0e0}
+</style>
+</head>
+
+<body>
+
+<h1>Práce se seznamy v jazyce F#</h1>
+
+<h3>Pavel Tišnovský</h3>
+
+<p></p>
+
+<h1>Úvodník</h1>
+
+<p>V dnešním článku o programovacím jazyce F# se budeme zabývat zdánlivě triviálním tématem: datovým typem seznam (list). Ve skutečnosti se však v jazycích odvozených od původního jazyka ML jedná o velmi flexibilní datový typ, pro jehož zpracování (a to včetně pattern matchingu) navíc existují speciální syntaktické prvky.</p>
+
+
+
+<h2>Obsah</h2>
+
+<p><a href="#k01">1. Práce se seznamy v&nbsp;jazyce F#</a></p>
+<p><a href="#k02">2. Konstruktor seznamů</a></p>
+<p><a href="#k03">3. Prázdný seznam</a></p>
+<p><a href="#k04">4. Využití operátoru <i>range</i> při konstrukci seznamu</a></p>
+<p><a href="#k05">5. Rekurzivní definice seznamu a operátor ::</a></p>
+<p><a href="#k06">6. Spojení seznamů operátorem @</a></p>
+<p><a href="#k07">7. Původní základní funkce pro práci se seznamy</a></p>
+<p><a href="#k08">8. Nová alternativa k&nbsp;původním funkcím: vlastnosti (<i>properties</i>) seznamů</a></p>
+<p><a href="#k09">9. Seznamy a pattern matching</a></p>
+<p><a href="#k10">10. Idiomatický způsob zápisu rekurzivního výpočtu délky seznamu</a></p>
+<p><a href="#k11">11. Záleží na pořadí větví v&nbsp;bloku <strong>match</strong>?</a></p>
+<p><a href="#k12">12. Rekurzivní zápis funkce <strong>append</strong> pro spojení dvou seznamů</a></p>
+<p><a href="#k13">13. Implementace funkce <strong>append</strong> založená na pattern matchingu</a></p>
+<p><a href="#k14">14. Součet hodnot všech prvků uložených v&nbsp;seznamu</a></p>
+<p><a href="#k15">15. Využití tail rekurze při součtu všech prvků v&nbsp;seznamu</a></p>
+<p><a href="#k16">16. Test, zda jsou všechny prvky seznamu kladnými čísly</a></p>
+<p><a href="#k17">17. Obsah navazujícího článku</a></p>
+<p><a href="#k18">18. Repositář s&nbsp;demonstračními příklady</a></p>
+<p><a href="#k19">19. Literatura</a></p>
+<p><a href="#k20">20. Odkazy na Internetu</a></p>
+
+
+
+<p><a name="k01"></a></p>
+<h2 id="k01">1. Práce se seznamy v&nbsp;jazyce F#</h2>
+
+<p>Ve čtvrté části <a href="https://www.root.cz/serialy/f-a-ocaml/">seriálu o
+programovacím jazyce F#</a> se budeme zabývat zdánlivě triviálním tématem.
+Popíšeme si totiž způsoby práce s&nbsp;datovým typem seznam (<i>list</i>). Ve
+skutečnosti se však v&nbsp;programovacích jazycích odvozených od původního
+jazyka ML jedná o velmi flexibilní datový typ, pro jehož zpracování (a to
+včetně <i>pattern matchingu</i>) navíc existují speciální syntaktické
+prvky.</p>
+
+<p>Seznamy (<i>lists</i>) jsou vedle záznamů (<i>record</i>) nejdůležitějším
+složeným datovým typem programovacího jazyka F#. Jedná se o <i>homogenní</i>
+datový typ, což znamená, že všechny prvky seznamů musí být stejného typu, což
+je kontrolováno překladačem (příkladem heterogenních složených typů je právě
+záznam nebo n-tice).</p>
+
+
+
+<p><a name="k02"></a></p>
+<h2 id="k02">2. Konstruktor seznamů</h2>
+
+<p>Pokud je zřejmé, jaké prvky mají být v&nbsp;seznamu uloženy, lze pro
+konstrukci seznamů použít následující zápis, v&nbsp;němž jsou prvky umístěny do
+hranatých závorek a pro jejich vzájemné oddělení se používá středník (nikoli
+čárka!). Zápis tříprvkového seznamu s&nbsp;prvky typu celé číslo tedy může
+vypadat následovně:</p>
+
+<pre>
+let x = [1; 2; 3]
+&nbsp;
+printf "%A" x
+</pre>
+
+<p>Seznam, který tímto zápisem vznikne, má typ <strong>int list</strong>:</p>
+
+<pre>
+val x : int list = [1; 2; 3]
+</pre>
+
+<p>Pochopitelně můžeme vytvořit i seznam s&nbsp;prvky jiného typu:</p>
+
+<pre>
+let x = ["foo"; "bar"; "baz"]
+&nbsp;
+printf "%A" x
+</pre>
+
+<p>Výsledek:</p>
+
+<pre>
+val x : string list = ["foo"; "bar"; "baz"]
+</pre>
+
+<p>Prvky seznamů mohou být i záznamy, n-tice či další seznamy. Podívejme se na
+příklad s&nbsp;n-ticemi:</p>
+
+<pre>
+let x = [(1, 2); (2, 3); (3, 4)]
+&nbsp;
+printf "%A" x
+</pre>
+
+<p>Překladač v&nbsp;tomto případě opět kontroluje typ, a to rekurzivně (tedy
+všechny n-tice musí mít pouze dva prvky typu celé číslo):</p>
+
+<pre>
+val x : (int * int) list = [(1, 2); (2, 3); (3, 4)]
+</pre>
+
+<p>Pokus o vytvoření heterogenního seznamu skončí s&nbsp;chybou detekovanou již
+překladačem:</p>
+
+<pre>
+let x = [1; "foo"; 3]
+&nbsp;
+printf "%A" x
+</pre>
+
+<p>Chybová zpráva:</p>
+
+<pre>
+All elements of a list must be of the same type as the first element, which
+here is 'int'. This element has type 'string'.
+</pre>
+
+<p>přičemž druhý prvek tohoto seznamu je podtržen, takže je zřejmé, na kterém
+místě chyba vznikla.</p>
+
+
+
+<p><a name="k03"></a></p>
+<h2 id="k03">3. Prázdný seznam</h2>
+
+<p>Víme již, že speciálním případem n-tice je n-tice bez prvků (<i>unit</i>),
+která se zapisuje takto:</p>
+
+<pre>
+()
+</pre>
+
+<p>I u seznamů se jedná o speciální případ, o čemž se můžeme velmi snadno
+přesvědčit po konstrukci prázdného seznamu (tedy uvnitř složených závorek
+nejsou zapsány žádné prvky):</p>
+
+<pre>
+let x = []
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: v&nbsp;OCamlu se prázdný seznam nazývá
+&bdquo;nil&ldquo;.</div></p>
+
+<p>Povšimněte si, jakého typu je tento seznam:</p>
+
+<pre>
+val x : 'a list = []
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: o speciální případ se zde jedná
+z&nbsp;toho důvodu, že programovací jazyk F# nedokáže z&nbsp;prázdného seznamu
+odvodit typ prvků. V&nbsp;mnoha programových konstrukcích tak musí
+předpokládat, že se může jednat o libovolný seznam, čehož lze někdy využít. Na
+druhou stranu ovšem můžeme z&nbsp;&bdquo;typovaného&ldquo; seznamu získat
+prázdný &bdquo;typovaný&ldquo; seznam &ndash; postačuje například získat ocas
+z&nbsp;jednoprvkového seznamu s&nbsp;prvky typu celé číslo. Výsledkem bude
+prázdný seznam celých čísel.</div></p>
+
+<p><div class="rs-tip-major">Poznámka: prázdný seznam se v&nbsp;mnoha ohledech
+liší od typu <i>unit</i>!</div></p>
+
+
+
+<p><a name="k04"></a></p>
+<h2 id="k04">4. Využití operátoru <i>range</i> při konstrukci seznamu</h2>
+
+<p>Pro konstrukci seznamů lze využít i operátor <i>range</i> zapisovaný pomocí
+dvou teček. Seznam s&nbsp;deseti (ne devíti!) prvky 1 až 10 vytvoříme
+takto:</p>
+
+<pre>
+let x = [<strong>1..10</strong>]
+&nbsp;
+printf "%A" x
+</pre>
+
+<p>Výsledek:</p>
+
+<pre>
+[1; 2; 3; 4; 5; 6; 7; 8; 9; 10]
+</pre>
+
+<p>Určit lze i krok, který se zapisuje na druhou pozici (což může být matoucí;
+v&nbsp;jiných jazycích se krok a mez přehazují):</p>
+
+<pre>
+let y = [<strong>1..2..10</strong>]
+&nbsp;
+printf "%A" y
+</pre>
+
+<p>Výsledkem budou v&nbsp;tomto případě pouze liché prvky mezi 1 a 10
+(včetně):</p>
+
+<pre>
+[1; 3; 5; 7; 9]
+</pre>
+
+<p>Krok může být i záporný. Opět si to otestujme:</p>
+
+<pre>
+let x = [<strong>10..-1..0</strong>]
+&nbsp;
+printf "%A" x
+</pre>
+
+<p>Výsledkem nyní bude jedenáct prvků (včetně nuly):</p>
+
+<pre>
+[10; 9; 8; 7; 6; 5; 4; 3; 2; 1; 0]
+</pre>
+
+<p>A konečně kombinace záporného kroku, který se navíc liší od jedničky:</p>
+
+<pre>
+let y = [<strong>10..-2..0</strong>]
+&nbsp;
+printf "%A" y
+</pre>
+
+<p>Výsledek:</p>
+
+<pre>
+[10; 8; 6; 4; 2; 0]
+</pre>
+
+
+
+<p><a name="k05"></a></p>
+<h2 id="k05">5. Rekurzivní definice seznamu a operátor ::</h2>
+
+<p>Sémantika seznamů je do značné míry převzata z&nbsp;LISPu, ovšem syntaxe
+práce s&nbsp;nimi je do značné míry odlišná. Seznam může být v&nbsp;tomto
+kontextu definován rekurzivně:</p>
+
+<ul>
+<li>buď je seznam prázdný (což se zapisuje, jak již víme, prázdnými hranatými závorkami [])</li>
+<li>nebo má formu <strong>hlava::ocas</strong>, kde <strong>hlava</strong> je
+prvním prvkem seznamu a ocas tvoří zbytek prvků seznamu (opět jde o seznam).
+Operátor :: se nazývá <i>cons</i>.</li>
+</ul>
+
+<p>To ovšem například znamená, že seznam <strong>[42]</strong> je shodný se
+seznamem <strong>42::[]</strong>. To si ostatně můžeme snadno otestovat:</p>
+
+<pre>
+let x = [42]
+printf "%A" x
+&nbsp;
+let y = 42::[]
+printf "%A" y
+</pre>
+
+<p>Výsledky:</p>
+
+<pre>
+[42]
+[42]
+</pre>
+
+<p>Pokusme se podobným způsobem realizovat seznam se třemi prvky:</p>
+
+<pre>
+let x = ["foo"; "bar"; "baz"]
+printf "%A" x
+&nbsp;
+let y = "foo"::"bar"::"baz"::[]
+printf "%A" y
+</pre>
+
+<p>Výsledky:</p>
+
+<pre>
+[foo; bar; baz]
+[foo; bar; baz]
+</pre>
+
+<p>Z&nbsp;tohoto demonstračního příkladu si můžeme odvodit dvě vlastnosti
+programovacího jazyka F#:</p>
+
+<ol>
+<li>Operátor <strong>::</strong> je vyhodnocován zprava doleva</li>
+<li>Zápis seznamu stylem <strong>[prvek1;prvek2;prvek3;...]</strong> je ve
+skutečnosti jen syntaktických cukrem k&nbsp;zápisu
+<strong>prvek1::prvek2::prvek3...::[]</strong></li>
+</ol>
+
+<p><div class="rs-tip-major">Poznámka: prázdný seznam (nebo jakýkoli jiný
+seznam) je na konci výrazu s&nbsp;operátorem :: nutností. Nelze tedy zapsat jen
+1::2, to není z&nbsp;pohledu jazyka F# úplný výraz.</div></p>
+
+
+
+<p><a name="k06"></a></p>
+<h2 id="k06">6. Spojení seznamů operátorem @</h2>
+
+<p>Kromě operátoru <strong>::</strong> využijeme při práci se seznamy další
+speciální operátor zapisovaný znakem <strong>@</strong>. Tento operátor slouží
+pro spojení dvou seznamů (stejného typu!). Podívejme se na příklad použití:</p>
+
+<pre>
+let x = [1; 2; 3]
+let y = [1..10]
+let z = <strong>x @ y</strong>
+&nbsp;
+printf "%A" z
+</pre>
+
+<p>Výsledkem bude tento seznam:</p>
+
+<pre>
+[1; 2; 3; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10]
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: operátor lze opět řetězit, což ale není
+nic překvapivého.</div></p>
+
+<p>Typ spojovaných seznamů si hlídá překladač:</p>
+
+<pre>
+let x = [1; 2; 3]
+let y = ["foo"; "bar"; "baz"]
+let z = <strong>x @ y</strong>
+&nbsp;
+printf "%A" z
+</pre>
+
+<p>Zde pochopitelně bude nalezena chyba:</p>
+
+<pre>
+Type mismatch. Expecting a
+    'int list'    
+but given a
+    'string list'    
+The type 'int' does not match the type 'string'
+</pre>
+
+
+
+<p><a name="k07"></a></p>
+<h2 id="k07">7. Původní základní funkce pro práci se seznamy</h2>
+
+<p>V&nbsp;programovacím jazyku ML, z&nbsp;něhož jazyk F# vychází, bylo
+definováno několik základních funkcí určených pro práci se seznamy. Pro
+zajímavost si tyto funkce vypišme:</p>
+
+<table>
+<tr><th>Funkce</th><th>Stručný popis</th></tr>
+<tr><td>null(x)</td><td>test na prázdný seznam</td></tr>
+<tr><td>length(x)</td><td>délka seznamu</td></tr>
+<tr><td>hd(x)</td><td>první prvek seznamu</td></tr>
+<tr><td>tl(x)</td><td>ocas seznamu (bez prvního prvku)</td></tr>
+<tr><td>nth(x)</td><td>n-tý prvek seznamu</td></tr>
+</table>
+
+<p>Následuje příklad použití funkce <strong>null</strong> a <strong>tl</strong>
+pro rekurzivní výpočet délky seznamu v&nbsp;jazyce ML (SML):</p>
+
+<pre>
+<i>(* Naivní implementace funkce length *)</i>
+&nbsp;
+fun len(x) = if <strong>null(x)</strong> then 0
+             else 1 + len(<strong>tl(x)</strong>);
+&nbsp;
+len([1,2,3,4]);
+</pre>
+
+
+
+<p><a name="k08"></a></p>
+<h2 id="k08">8. Nová alternativa k&nbsp;původním funkcím: vlastnosti (<i>properties</i>) seznamů</h2>
+
+<p>V&nbsp;jazyce F# <a href="#k07">výše uvedené funkce</a> nenalezneme. Namísto
+toho se totiž používají takzvané vlastnosti (<i>properties</i>), které se
+zapisují s&nbsp;využitím tečkové notace. Všech pět výše uvedených funkcí má
+svoji obdobu, i když s&nbsp;poněkud odlišnými jmény (používají se celá slova,
+mj.&nbsp;i proto, že o jejich doplnění se pokouší integrované vývojové
+prostředí):</p>
+
+<table>
+<tr><th>Vlastnost</th><th>Stručný popis</th></tr>
+<tr><td>list.IsEmpty</td><td>test na prázdný seznam</td></tr>
+<tr><td>list.Length</td><td>délka seznamu</td></tr>
+<tr><td>list.Head</td><td>první prvek seznamu</td></tr>
+<tr><td>list.Tail</td><td>ocas seznamu (bez prvního prvku)</td></tr>
+<tr><td>list.Item n</td><td>n-tý prvek seznamu</td></tr>
+</table>
+
+<p>Podívejme se nyní na základní způsob použití těchto vlastností &ndash;
+budeme zjišťovat informace o seznamu <strong>z</strong>:</p>
+
+<pre>
+let x = [1; 2; 3]
+let y = [1..10]
+let z = x @ y
+&nbsp;
+printf "list:   %A" z
+printf "empty?: %b" z.IsEmpty
+printf "length: %d" z.Length
+printf "head:   %A" z.Head
+printf "tail:   %A" z.Tail
+printf "item 3: %A" (z.Item 3)
+</pre>
+
+<p>Výsledky budou vypadat následovně:</p>
+
+<pre>
+list:   [1; 2; 3; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10]
+empty?: false
+length: 13
+head:   1
+tail:   [2; 3; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10]
+item 3: 1
+</pre>
+
+<p>Reimplementace funkce <strong>len</strong> <a href="#k07">z&nbsp;předchozí
+kapitoly</a> může vypadat následovně:</p>
+
+<pre>
+<i>(* Naivní implementace funkce length *)</i>
+&nbsp;
+let rec len (x:'a list) =
+    if x.IsEmpty then 0
+    else 1 + (len x.Tail)
+&nbsp;
+printf "%d" (len [1;2;3;4])
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: povšimněte si, že se v&nbsp;žádném
+případě nejedná o příliš elegantní zápis (navíc je vyžadováno explicitní určení
+typu parametru, na což nejsme v&nbsp;jazyce F# zvyklí). Ovšem dále si uvedeme
+mnohem idiomatičtější způsob zápisu podobné funkce.</div></p>
+
+
+
+<p><a name="k09"></a></p>
+<h2 id="k09">9. Seznamy a pattern matching</h2>
+
+<p>Operátor <strong>::</strong>, o němž jsme se zmínili v&nbsp;předchozích
+kapitolách, lze využít i při zápisu vzoru (<i>pattern</i>) v&nbsp;bloku
+<strong>match</strong>. To tedy znamená, že můžeme zapsat test, zda seznam
+obsahuje na začátku nějaký prvek, jakou hodnotu má tento prvek atd. Jedná se o
+velmi silný koncept, která nám umožňuje elegantní realizaci mnoha funkcí, které
+musí zpracovat prvky seznamu. Většina těchto funkcí zpracovává seznam
+sekvenčně, tedy nejdříve zpracuje jeho první prvek (hlavu) a poté rekurzivně
+zbytek seznamu (ocas). Některé ukázky budou uvedeny v&nbsp;navazujících
+kapitolách.</p>
+
+
+
+<p><a name="k10"></a></p>
+<h2 id="k10">10. Idiomatický způsob zápisu rekurzivního výpočtu délky seznamu</h2>
+
+<p><a href="#k08">V&nbsp;osmé kapitole</a> jsme si ukázali rekurzivní zápis
+funkce pro výpočet délky seznamu. Tuto funkci můžeme velmi snadno přepsat do
+podoby, v&nbsp;níž se použije <i>pattern matching</i>. Upravený tvar může
+vypadat následovně a velmi přesně odpovídá teoretickému zápisu algoritmu:</p>
+
+<pre>
+<i>(* Méně naivní implementace funkce length *)</i>
+&nbsp;
+let rec len x =
+    match x with
+    | [] -&gt; 0
+    | head :: tail -&gt; 1 + len tail
+&nbsp;
+printf "%d" (len [1;2;3;4])
+</pre>
+
+<p>Povšimněte si, že ve větvi začínající vzorkem <strong>head :: tail</strong>
+se ve skutečnosti nikde nepracuje s&nbsp;hodnotou prvního prvku seznamu
+(<i>head</i>). Proto můžeme tento identifikátor nahradit za podtržítko.
+Výsledkem bude naprosto stejná realizace algoritmu, ovšem bez přebytečných
+identifikátorů:</p>
+
+<pre>
+<i>(* Méně naivní implementace funkce length *)</i>
+&nbsp;
+let rec len x =
+    match x with
+    | [] -&gt; 0
+    | _ :: tail -&gt; 1 + len tail
+&nbsp;
+printf "%d" (len [1;2;3;4])
+</pre>
+
+
+
+<p><a name="k11"></a></p>
+<h2 id="k11">11. Záleží na pořadí větví v&nbsp;bloku <strong>match</strong>?</h2>
+
+<p>V&nbsp;mnoha programovacích jazycích se používá nějaká obdoba konstrukce
+<strong>switch-case</strong>, v&nbsp;níž se nějaká hodnota <i>postupně</i>
+porovnává se vzorky v&nbsp;jednotlivých větvích (a většinou jsou možnosti
+zápisu vzorků dosti omezené). Mohlo by se tedy zdát, že i v&nbsp;jazyku F#
+musíme nejdříve otestovat, zda není zpracovávaný seznam prázdný a teprve poté
+řešit možnost, že seznam obsahuje hlavu (tedy skutečný prvek) a ocas (ten už
+může být prázdný). Ovšem ve skutečnosti tomu tak přesně není, o čemž se lze
+velmi snadno přesvědčit, protože i následující příklad je plně funkční, i když
+mu předáme (přímo či nepřímo) prázdný seznam. Nedojde tedy k&nbsp;pádu ani
+k&nbsp;vyhození výjimky:</p>
+
+<pre>
+<i>(* Méně naivní implementace funkce length *)</i>
+&nbsp;
+let rec len x =
+    match x with
+    | head :: tail -&gt; 1 + len tail
+    | [] -&gt; 0
+&nbsp;
+printf "%d" (len [1;2;3;4])
+</pre>
+
+<p>Naproti tomu na pořadí větví záleží &ndash; zkuste si prohodit předposlední
+a poslední větev a zjistit, jaké řetězce se vypíšou:</p>
+
+<pre>
+let rec foo x =
+    match x with
+    | [] -&gt; "nil"
+    | [x] -&gt; "one item"
+    | head :: tail -&gt; "more items"
+&nbsp;
+printf "%s" (foo [])
+printf "%s" (foo [1])
+printf "%s" (foo [1; 2])
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: navíc dokáže překladač zjistit, zda se
+v&nbsp;bloku <strong>match</strong> skutečně testují všechny možnosti, které
+mohou nastat. Pokud se netestují, překladač vypíše varování.</div></p>
+
+
+
+<p><a name="k12"></a></p>
+<h2 id="k12">12. Rekurzivní zápis funkce <strong>append</strong> pro spojení dvou seznamů</h2>
+
+<p>Podobně si můžeme nadefinovat funkci <strong>append</strong>, která vrací
+nový seznam vzniklý spojením dvou seznamů <strong>x</strong> a
+<strong>y</strong>. Tedy například:</p>
+
+<pre>
+<strong>append([1, 2], [3, 4, 5])</strong>
+[1, 2, 3, 4, 5]
+</pre>
+
+<p>Na problém implementace této funkce můžeme použít princip postupného
+zjednodušování problému. Známe totiž dva invarianty:</p>
+
+<pre>
+append([],z) == z
+append(a :: y, z) == a :: append(y,z)
+</pre>
+
+<p>Postupně tedy budeme zkracovat první seznam až dojdeme do situace, kdy je
+tento seznam prázdný. Přímo z&nbsp;těchto podmínek je možné odvodit
+implementaci funkce <strong>append</strong>:</p>
+
+<pre>
+<i>(* Naivní implementace funkce append *)</i>
+&nbsp; 
+let rec <strong>append</strong> (x: 'a list) y =
+    if x.IsEmpty then y
+    else x.Head :: (<strong>append</strong> x.Tail y)
+&nbsp; 
+&nbsp; 
+printf "%A" (append [] [1; 2; 3])
+printf "%A" (append [1; 2; 3] [])
+printf "%A" (append [1; 2; 3] [4; 5])
+printf "%A" (append [] [])
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: navíc se nám automaticky splnily všechny
+okrajové podmínky, tedy konkrétně situace, kdy je jeden ze seznamů
+prázdný.</div></p>
+
+<p>Při zavolání:</p>
+
+<pre>
+<strong>append([1,2], [3,4,5])</strong>
+</pre>
+
+<p>dojde k&nbsp;postupnému vykonání fáze <i>navíjení</i> a <i>odvíjení</i>, což
+si můžeme naznačit graficky:</p>
+
+<pre>
+1 :: append([2], [3,4,5])
+1 :: 2 :: append([], [3,4,5])
+1 :: 2 :: [3,4,5]
+1 :: [2,3,4,5]
+[1,2,3,4,5]
+</pre>
+
+<p>Důležitý je i typ nové funkce:</p>
+
+<pre>
+val append = fn: ∀ 'a . 'a list * 'a list → 'a list;
+</pre>
+
+<p>Tento zápis nám říká, že funkce bude akceptovat dva seznamy typu
+&bdquo;any&ldquo; a výsledkem bude další seznam typu &bdquo;any&ldquo;. Typ
+prvků seznamů sice není explicitně určen, ovšem je zaručeno, že oba dva vstupní
+seznamy budou mít stejný typ prvků, jako seznam výsledný.</p>
+
+
+
+<p><a name="k13"></a></p>
+<h2 id="k13">13. Implementace funkce <strong>append</strong> založená na pattern matchingu</h2>
+
+<p>V&nbsp;praxi se vždy při zápisu algoritmů, v&nbsp;nichž se vyskytuje plná
+podoba rozeskoku <strong>if-then-else</strong>, vyplatí popřemýšlet, zda nebude
+výhodnější použít <i>pattern matching</i>. U funkce <strong>append</strong>
+tomu tak skutečně je, protože její varianta s&nbsp;pattern matchingem je mnohem
+čitelnější. Je v&nbsp;ní patrné, jak postupně přesunujeme prvky z&nbsp;prvního
+seznamu do vznikajícího seznamu výsledného (a nakonec připojíme celý druhý
+seznam):</p>
+
+<pre>
+<i>(* Implementace funkce append založená na pattern matchingu *)</i>
+&nbsp; 
+let rec <strong>append</strong> x y =
+    match x with
+    | [] -&gt; y
+    | head :: tail -&gt; head :: <strong>append</strong> tail y
+&nbsp;
+&nbsp;
+printf "%A" (append [] [1; 2; 3])
+printf "%A" (append [1; 2; 3] [])
+printf "%A" (append [1; 2; 3] [4; 5])
+printf "%A" (append [] [])
+</pre>
+
+
+
+<p><a name="k14"></a></p>
+<h2 id="k14">14. Součet hodnot všech prvků uložených v&nbsp;seznamu</h2>
+
+<p>Mnoho operací nad seznamy je založeno na postupném zpracování prvků seznamu,
+konkrétně od prvku prvního (hlavy). To většinou vede k&nbsp;velmi podobnému
+zápisu algoritmů, zejména při použití pattern matchingu. Ostatně si můžeme
+ukázat realizaci dalšího algoritmu, tentokrát algoritmu pro součet všech prvků
+v&nbsp;seznamu. Řešení bude opět rekurzivní a vzorky použité v&nbsp;bloku
+<strong>match</strong> jsou totožné se vzorky z&nbsp;předchozích demonstračních
+příkladů, což je ovšem logické, protože opět potřebujeme vyřešit dva případy
+&ndash; prázdný seznam a seznam s&nbsp;minimálně jedním prvkem:</p>
+
+<pre>
+let rec <strong>sum</strong> x =
+    match x with
+    | [] -&gt; 0
+    | head :: tail -&gt; head + <strong>sum</strong> tail
+&nbsp;
+printf "%d" (sum [])
+printf "%d" (sum [1; 2; 3])
+</pre>
+
+
+
+<p><a name="k15"></a></p>
+<h2 id="k15">15. Využití tail rekurze při součtu všech prvků v&nbsp;seznamu</h2>
+
+<p>Přímá rekurze, která není v&nbsp;tail pozici a kterou jsme použili při
+realizaci algoritmu pro součet prvků v&nbsp;seznamu, není v&nbsp;praxi příliš
+efektivní. Proto se můžeme pokusit o její nahrazení variantou s&nbsp;tail
+pozicí, což opět (prakticky nutně) vede k&nbsp;použití <i>akumulátoru</i> a
+vnitřní pomocné funkce, která je založena na tail rekurzi a kterou voláme
+s&nbsp;předáním akumulované hodnoty. Povšimněte si, že tato funkce
+(<strong>sumr</strong>) má dva parametry &ndash; seznam a hodnotu akumulátoru a
+skutečně volá sebe samu v&nbsp;tail pozici (tedy výsledek volané funkce je
+současně i výsledkem funkce aktuálně prováděné):</p>
+
+<pre>
+let <strong>sum</strong> x =
+    let rec <strong>sumr</strong> x a =
+        match x with
+        | [] -&gt; a
+        | head :: tail -&gt; <strong>sumr</strong> tail (a + head)
+    <strong>sumr</strong> x 0
+&nbsp;
+printf "%d" (sum [])
+printf "%d" (sum [1; 2; 3])
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: počáteční hodnota akumulátoru je
+pochopitelně v&nbsp;tomto konkrétním případě nulová.</div></p>
+
+
+
+<p><a name="k16"></a></p>
+<h2 id="k16">16. Test, zda jsou všechny prvky seznamu kladnými čísly</h2>
+
+<p>V&nbsp;posledním demonstračním příkladu, který si dnes ukážeme, je
+implementován algoritmus, který zjistí, jestli seznam obsahuje pouze kladná
+čísla. Pro prázdný seznam byla zvolena výsledná hodnota <strong>false</strong>,
+ale to je diskutabilní &ndash; můžete si zde dosadit <strong>true</strong>
+podle způsobu použití. Povšimněte si, že zde (nově) řešíme případ seznamu
+s&nbsp;jediným prvkem. Poslední větev v&nbsp;bloku <strong>match</strong> je
+již klasická &ndash; pokud je první prvek kladný, zjistíme výsledek pro zbytek
+seznamu a použijeme logický součin:</p>
+
+<pre>
+let rec <strong>all_pos</strong> x =
+    match x with
+    | [] -&gt; false
+    | [x] -&gt; x &gt; 0
+    | head :: tail -&gt; head &gt; 0 &amp;&amp; <strong>all_pos</strong> tail
+&nbsp;
+printf "%b" (all_pos [])
+printf "%b" (all_pos [1; 2; 3])
+printf "%b" (all_pos [-1; 2; 3])
+printf "%b" (all_pos [1; 2; -3])
+</pre>
+
+<p>Alternativně můžeme použít vzorek s&nbsp;podmínkou zapsanou ve
+<strong>when</strong>. Zjistíme tak kladnost prvku v&nbsp;jednoprvkovém
+seznamu. Druhá větev (bez <strong>when</strong>) se v&nbsp;takovém případě
+nepoužije &ndash; záleží zde na pořadí jednotlivých větví:</p>
+
+<pre>
+let rec <strong>all_pos</strong> x =
+    match x with
+    | [] -&gt; false
+    | [x] when x &gt; 0 -&gt; true
+    | [x] -&gt; false
+    | head :: tail -&gt; head &gt; 0 &amp;&amp; <strong>all_pos</strong> tail
+&nbsp;
+printf "%b" (all_pos [])
+printf "%b" (all_pos [1; 2; 3])
+printf "%b" (all_pos [-1; 2; 3])
+printf "%b" (all_pos [1; 2; -3])
+</pre>
+
+<p>To, že záleží na pořadí větví, si můžete otestovat na příkladu, v&nbsp;němž
+se můžete pokusit prohodit druhou a třetí větev:</p>
+
+<pre>
+let rec last_pos x =
+    match x with
+    | [] -&gt; "nil"
+    | [x] -&gt; "x&lt;=0"
+    | [x] when x &gt; 0 -&gt; "x&gt;0"
+    | head :: tail -&gt; last_pos tail
+&nbsp;
+printf "%s" (all_pos [])
+printf "%s" (all_pos [1; 2; 3])
+printf "%s" (all_pos [-1; 2; 3])
+printf "%s" (all_pos [1; 2; -3])
+</pre>
+
+
+
+<p><a name="k17"></a></p>
+<h2 id="k17">17. Obsah navazujícího článku</h2>
+
+<p>V&nbsp;navazující části článku o programovacím jazyku F# si popíšeme způsoby
+práce s&nbsp;dalšími velmi užitečnými datovými typy. V&nbsp;první řadě se jedná
+o typ <i>Option</i> a typ <i>Result</i>, což jsou v&nbsp;podstatě monády
+(nelekněte se) použité resp.&nbsp;přesněji řečeno převzaté do programovacího
+jazyka Rust. A taktéž si popíšeme způsob práce s&nbsp;poli (<i>Array</i>).</p>
+
+
+
+<p><a name="k18"></a></p>
+<h2 id="k18">18. Repositář s&nbsp;demonstračními příklady</h2>
+
+<p>Všechny výše popsané demonstrační příklady byly uloženy do repositáře
+dostupného na adrese <a
+href="https://github.com/tisnik/f-sharp-examples/">https://github.com/tisnik/f-sharp-examples/</a>.
+V&nbsp;tabulce umístěné pod tímto odstavcem jsou uvedeny odkazy na tyto
+příklady:</p>
+
+<table>
+<tr><th> #</th><th>Příklad</th><th>Popis příkladu</th><th>Cesta</th></tr>
+<tr><td> 1</td><td>ML/fib_recursive.ml</td><td>výpočet hodnoty z&nbsp;Fibonacciho posloupnosti rekurzivně</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/ML/fib_recursive.ml">https://github.com/tisnik/f-sharp-examples/tree/master/ML/fib_recursive.ml</a></td></tr>
+<tr><td> 2</td><td>ML/fib_pattern_matching.ml</td><td>výpočet hodnoty z&nbsp;Fibonacciho posloupnosti založený na pattern matchingu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/ML/fib_pattern_matching.ml">https://github.com/tisnik/f-sharp-examples/tree/master/ML/fib_pattern_matching.ml</a></td></tr>
+<tr><td> 3</td><td>ML/len_pattern_matching_1.ml</td><td>výpočet délky seznamu založený na pattern matchingu (první varianta)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/ML/len_pattern_matching_1.ml">https://github.com/tisnik/f-sharp-examples/tree/master/ML/len_pattern_matching_1.ml</a></td></tr>
+<tr><td> 4</td><td>ML/len_pattern_matching_2.ml</td><td>výpočet délky seznamu založený na pattern matchingu (zkrácená varianta)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/ML/len_pattern_matching_2.ml">https://github.com/tisnik/f-sharp-examples/tree/master/ML/len_pattern_matching_2.ml</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td> 5</td><td>OCaml/fib_recursive.ml</td><td>výpočet hodnoty z&nbsp;Fibonacciho posloupnosti rekurzivně</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/OCaml/fib_recursive.ml">https://github.com/tisnik/f-sharp-examples/tree/master/OCaml/fib_recursive.ml</a></td></tr>
+<tr><td> 6</td><td>OCaml/fib_tail_recursive.ml</td><td>výpočet hodnoty z&nbsp;Fibonacciho posloupnosti s&nbsp;využitím koncové rekurze</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/OCaml/fib_tail_recursive.ml">https://github.com/tisnik/f-sharp-examples/tree/master/OCaml/fib_tail_recursive.ml</a></td></tr>
+<tr><td> 7</td><td>OCaml/fib_pattern_matching.ml</td><td>výpočet hodnoty z&nbsp;Fibonacciho posloupnosti založený na pattern matchingu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/OCaml/fib_pattern_matching.ml">https://github.com/tisnik/f-sharp-examples/tree/master/OCaml/fib_pattern_matching.ml</a></td></tr>
+<tr><td> 8</td><td>OCaml/local_binding.ml</td><td>symbol lokální uvnitř funkce</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/OCaml/local_binding.ml">https://github.com/tisnik/f-sharp-examples/tree/master/OCaml/local_binding.ml</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td> 9</td><td>article_01/function.fs</td><td>deklarace pojmenované funkce</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_01/function.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_01/function.fs</a></td></tr>
+<tr><td>10</td><td>article_01/lambda.fs</td><td>deklarace anonymní funkce</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_01/lambda.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_01/lambda.fs</a></td></tr>
+<tr><td>11</td><td>article_01/local_binding_1.fs</td><td>lokální symboly ve funkci</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_01/local_binding_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_01/local_binding_1.fs</a></td></tr>
+<tr><td>12</td><td>article_01/local_binding_2.fs</td><td>lokální symboly ve funkci</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_01/local_binding_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_01/local_binding_2.fs</a></td></tr>
+<tr><td>13</td><td>article_01/function_type_1.fs</td><td>explicitní definice návratového typu funkce (korektní)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_01/function_type_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_01/function_type_1.fs</a></td></tr>
+<tr><td>14</td><td>article_01/function_type_2.fs</td><td>explicitní definice návratového typu funkce (nekorektní)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_01/function_type_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_01/function_type_2.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>15</td><td>article_02/basic_binding.fs</td><td>navázání hodnoty na symbol (deklarace proměnné)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/basic_binding.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/basic_binding.fs</a></td></tr>
+<tr><td>16</td><td>article_02/print_variable.fs</td><td>tisk hodnoty proměnné</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/print_variable.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/print_variable.fs</a></td></tr>
+<tr><td>17</td><td>article_02/variables_and_functions.fs</td><td>předání proměnné do funkce</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/variables_and_functions.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/variables_and_functions.fs</a></td></tr>
+<tr><td>18</td><td>article_02/redefine_symbol_1.fs</td><td>pokus o redefinici symbolu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/redefine_symbol_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/redefine_symbol_1.fs</a></td></tr>
+<tr><td>19</td><td>article_02/redefine_symbol_2.fs</td><td>pokus o redefinici symbolu (složitější příklad)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/redefine_symbol_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/redefine_symbol_2.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>20</td><td>article_02/equal_operator_1.fs</td><td>operátor =</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/equal_operator_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/equal_operator_1.fs</a></td></tr>
+<tr><td>21</td><td>article_02/equal_operator_2.fs</td><td>operátor =</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/equal_operator_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/equal_operator_2.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>22</td><td>article_02/immutable_variable.fs</td><td>&bdquo;změna&ldquo; neměnitelné proměnné</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/immutable_variable.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/immutable_variable.fs</a></td></tr>
+<tr><td>23</td><td>article_02/mutable_variable.fs</td><td>změna měnitelné proměnné</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/mutable_variable.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/mutable_variable.fs</a></td></tr>
+<tr><td>24</td><td>article_02/reference_1.fs</td><td>reference, příklad kompatibilní s&nbsp;OCamlem</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/reference_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/reference_1.fs</a></td></tr>
+<tr><td>25</td><td>article_02/reference_2.fs</td><td>reference, nová syntaxe pro F#</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/reference_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/reference_2.fs</a></td></tr>
+<tr><td>26</td><td>article_02/incr1.fs</td><td>standardní funkce <strong>incr</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/incr1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/incr1.fs</a></td></tr>
+<tr><td>27</td><td>article_02/incr2.fs</td><td>zvýšení referencované hodnoty o jedničku</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/incr2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/incr2.fs</a></td></tr>
+<tr><td>28</td><td>article_02/shadow.fs</td><td>shadowing symbolu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/shadow.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/shadow.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>29</td><td>article_02/tuple.fs</td><td>datový typ n-tice (<i>tuple</i>)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/tuple.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/tuple.fs</a></td></tr>
+<tr><td>30</td><td>article_02/record_1.fs</td><td>datový typ záznam (<i>record</i>), deklarace proměnné tohoto typu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/record_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/record_1.fs</a></td></tr>
+<tr><td>31</td><td>article_02/record_2.fs</td><td>datový typ záznam (<i>record</i>) a typová inference při deklaraci proměnné</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/record_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/record_2.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>32</td><td>article_02/basic_binding.fsx</td><td>demonstrační příklad <strong>basic_binding.fs</strong> přepsaný do podoby skriptu pro <i>dotnet fsi</i></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/basic_binding.fsx">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/basic_binding.fsx</a></td></tr>
+<tr><td>33</td><td>article_02/equal_operator_1.fsx</td><td>demonstrační příklad <strong>equal_operator_1.fs</strong> přepsaný do podoby skriptu pro <i>dotnet fsi</i></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/equal_operator_1.fsx">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/equal_operator_1.fsx</a></td></tr>
+<tr><td>34</td><td>article_02/equal_operator_2.fsx</td><td>demonstrační příklad <strong>equal_operator_2.fs</strong> přepsaný do podoby skriptu pro <i>dotnet fsi</i></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/equal_operator_2.fsx">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/equal_operator_2.fsx</a></td></tr>
+<tr><td>35</td><td>article_02/immutable_variable.fsx</td><td>demonstrační příklad <strong>immutable_variable.fs</strong> přepsaný do podoby skriptu pro <i>dotnet fsi</i></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/immutable_variable.fsx">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/immutable_variable.fsx</a></td></tr>
+<tr><td>36</td><td>article_02/mutable_variable.fsx</td><td>demonstrační příklad <strong>mutable_variable.fs</strong> přepsaný do podoby skriptu pro <i>dotnet fsi</i></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/mutable_variable.fsx">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/mutable_variable.fsx</a></td></tr>
+<tr><td>37</td><td>article_02/print_variable.fsx</td><td>demonstrační příklad <strong>print_variable.fs</strong> přepsaný do podoby skriptu pro <i>dotnet fsi</i></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/print_variable.fsx">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/print_variable.fsx</a></td></tr>
+<tr><td>38</td><td>article_02/redefine_symbol_1.fsx</td><td>demonstrační příklad <strong>redefine_symbol_1.fs</strong> přepsaný do podoby skriptu pro <i>dotnet fsi</i></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/redefine_symbol_1.fsx">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/redefine_symbol_1.fsx</a></td></tr>
+<tr><td>39</td><td>article_02/redefine_symbol_2.fsx</td><td>demonstrační příklad <strong>redefine_symbol_2.fs</strong> přepsaný do podoby skriptu pro <i>dotnet fsi</i></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/redefine_symbol_2.fsx">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/redefine_symbol_2.fsx</a></td></tr>
+<tr><td>40</td><td>article_02/variables_and_functions.fsx</td><td>demonstrační příklad <strong>variables_and_functions.fs</strong> přepsaný do podoby skriptu pro <i>dotnet fsi</i></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/variables_and_functions.fsx">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/variables_and_functions.fsx</a></td></tr>
+<tr><td>41</td><td>article_02/incr1.fsx</td><td>demonstrační příklad <strong>incr1.fs</strong> přepsaný do podoby skriptu pro <i>dotnet fsi</i></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/incr1.fsx">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/incr1.fsx</a></td></tr>
+<tr><td>42</td><td>article_02/incr2.fsx</td><td>demonstrační příklad <strong>incr2.fs</strong> přepsaný do podoby skriptu pro <i>dotnet fsi</i></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/incr2.fsx">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/incr2.fsx</a></td></tr>
+<tr><td>43</td><td>article_02/reference_1.fsx</td><td>demonstrační příklad <strong>reference_1.fs</strong> přepsaný do podoby skriptu pro <i>dotnet fsi</i></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/reference_1.fsx">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/reference_1.fsx</a></td></tr>
+<tr><td>44</td><td>article_02/reference_2.fsx</td><td>demonstrační příklad <strong>reference_2.fs</strong> přepsaný do podoby skriptu pro <i>dotnet fsi</i></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/reference_2.fsx">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/reference_2.fsx</a></td></tr>
+<tr><td>45</td><td>article_02/ident.fsx</td><td>demonstrační příklad <strong>ident.fs</strong> přepsaný do podoby skriptu pro <i>dotnet fsi</i></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_02/ident.fsx">https://github.com/tisnik/f-sharp-examples/tree/master/article_02/ident.fsx</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>46</td><td>article_03/recursion1.fs</td><td>pokus o deklaraci funkce s&nbsp;přímou rekurzí založený na <strong>let</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/recursion1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/recursion1.fs</a></td></tr>
+<tr><td>47</td><td>article_03/recursion2.fs</td><td>deklarace funkce s&nbsp;přímou rekurzí založená na <strong>let rec</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/recursion2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/recursion2.fs</a></td></tr>
+<tr><td>48</td><td>article_03/recursion3.fs</td><td>využití tail rekurze pro výpočet členu Fibonacciho posloupnosti</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/recursion3.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/recursion3.fs</a></td></tr>
+<tr><td>49</td><td>article_03/recursion4.fs</td><td>obyčejná nerekurzivní funkce definovaná přes <strong>let rec</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/recursion4.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/recursion4.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>50</td><td>article_03/odd_even_1.fs</td><td>nepřímá rekurze (nekorektní varianta)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/odd_even_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/odd_even_1.fs</a></td></tr>
+<tr><td>51</td><td>article_03/odd_even_2.fs</td><td>nepřímá rekurze (taktéž nekorektní varianta)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/odd_even_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/odd_even_2.fs</a></td></tr>
+<tr><td>52</td><td>article_03/odd_even_3.fs</td><td>jediný korektní zápis nepřímé rekurze</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/odd_even_3.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/odd_even_3.fs</a></td></tr>
+<tr><td>53</td><td>article_03/odd_even_4.fs</td><td>nepřímá rekurze bez použití klíčového slova <strong>rec</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/odd_even_4.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/odd_even_4.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>54</td><td>article_03/pattern1.fs</td><td>výpočet Faktoriálu založený na pattern matchingu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/pattern1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/pattern1.fs</a></td></tr>
+<tr><td>55</td><td>article_03/pattern2.fs</td><td>výpočet Faktoriálu založený na pattern matchingu, sloučení vstupů se stejným výstupem</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/pattern2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/pattern2.fs</a></td></tr>
+<tr><td>56</td><td>article_03/pattern3.fs</td><td>kontrola neplatného vstupu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/pattern3.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/pattern3.fs</a></td></tr>
+<tr><td>57</td><td>article_03/pattern4.fs</td><td>pattern matching pro větší množství hodnot</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/pattern4.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/pattern4.fs</a></td></tr>
+<tr><td>58</td><td>article_03/pattern5.fs</td><td>rekurzivní implementace Ackermannovy funkce</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/pattern5.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/pattern5.fs</a></td></tr>
+<tr><td>59</td><td>article_03/pattern6.fs</td><td>kontrola neplatných vstupních hodnot pro Ackermannovu funkci</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/pattern6.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/pattern6.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>60</td><td>article_03/fibonacci1.fs</td><td>výpočet Fibonacciho posloupnosti založený na pattern matchingu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/fibonacci1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/fibonacci1.fs</a></td></tr>
+<tr><td>61</td><td>article_03/fibonacci2.fs</td><td>výpočet Fibonacciho posloupnosti založený na pattern matchingu (více idiomatický zápis)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/fibonacci2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/fibonacci2.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>62</td><td>article_03/first.fs</td><td>funkce vracející první prvek z&nbsp;dvojice založená na pattern matchingu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/first.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/first.fs</a></td></tr>
+<tr><td>63</td><td>article_03/second.fs</td><td>funkce vracející druhý prvek z&nbsp;dvojice založená na pattern matchingu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/second.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/second.fs</a></td></tr>
+<tr><td>64</td><td>article_03/zero_coordinate.fs</td><td>test na nulovou souřadnici/souřadnice založený na pattern matchingu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/zero_coordinate.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/zero_coordinate.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>65</td><td>article_03/get_model.fs</td><td>získání prvku ze záznamu (opět založeno na pattern matchingu)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/get_model.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/get_model.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>66</td><td>article_04/list_literal_1.fs</td><td>seznam se třemi prvky typu celé číslo</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_1.fs</a></td></tr>
+<tr><td>67</td><td>article_04/list_literal_2.fs</td><td>seznam se třemi prvky typu řetězec</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_2.fs</a></td></tr>
+<tr><td>68</td><td>article_04/list_literal_3.fs</td><td>seznam se třemi prvky typu n-tice</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_3.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_3.fs</a></td></tr>
+<tr><td>69</td><td>article_04/list_literal_4.fs</td><td>nekorektní pokus o vytvoření seznamu s&nbsp;prvky různých typů</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_4.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_4.fs</a></td></tr>
+<tr><td>70</td><td>article_04/empty_list.fs</td><td>konstrukce prázdného seznamu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/empty_list.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/empty_list.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>71</td><td>article_04/head_tail_1.fs</td><td>složení seznamu se dvěma prvky s&nbsp;využitím operátoru <strong>::</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/head_tail_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/head_tail_1.fs</a></td></tr>
+<tr><td>72</td><td>article_04/head_tail_2.fs</td><td>složení seznamu se třemi prvky s&nbsp;využitím operátoru <strong>::</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/head_tail_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/head_tail_2.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>73</td><td>article_04/list_properties.fs</td><td>vlastnosti (<i>properties</i>) seznamů</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_properties.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_properties.fs</a></td></tr>
+<tr><td>74</td><td>article_04/len_1.fs</td><td>naivní rekurzivní výpočet délky seznamu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/len_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/len_1.fs</a></td></tr>
+<tr><td>75</td><td>article_04/len_2.fs</td><td>vylepšený rekurzivní výpočet délky seznamu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/len_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/len_2.fs</a></td></tr>
+<tr><td>76</td><td>article_04/len_3.fs</td><td>vylepšený rekurzivní výpočet délky seznamu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/len_3.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/len_3.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>77</td><td>article_04/range_1.fs</td><td>vytvoření sekvence numerických hodnot s&nbsp;využitím operátoru <strong>range</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_1.fs</a></td></tr>
+<tr><td>78</td><td>article_04/range_2.fs</td><td>vytvoření sekvence numerických hodnot s&nbsp;využitím operátoru <strong>range</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_2.fs</a></td></tr>
+<tr><td>79</td><td>article_04/range_3.fs</td><td>vytvoření sekvence numerických hodnot s&nbsp;využitím operátoru <strong>range</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_3.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_3.fs</a></td></tr>
+<tr><td>80</td><td>article_04/range_4.fs</td><td>vytvoření sekvence numerických hodnot s&nbsp;využitím operátoru <strong>range</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_4.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_4.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>81</td><td>article_04/join_lists.fs</td><td>spojení dvou seznamů operátorem <strong>::</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/join_lists.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/join_lists.fs</a></td></tr>
+<tr><td>82</td><td>article_04/append_1.fs</td><td>implementace spojení dvou seznamů rekurzivním výpočtem</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/append_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/append_1.fs</a></td></tr>
+<tr><td>83</td><td>article_04/append_2.fs</td><td>implementace spojení dvou seznamů rekurzivním výpočtem, použití pattern matchingu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/append_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/append_2.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>84</td><td>article_04/sum_1.fs</td><td>součet hodnot všech prvků v&nbsp;seznamu (bez tail rekurze)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/sum_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/sum_1.fs</a></td></tr>
+<tr><td>85</td><td>article_04/sum_2.fs</td><td>součet hodnot všech prvků v&nbsp;seznamu (s&nbsp;využitím tail rekurze)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/sum_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/sum_2.fs</a></td></tr>
+</table>
+
+
+
+<p><a name="k19"></a></p>
+<h2 id="k19">19. Literatura</h2>
+
+<p><div class="rs-tip-major">Poznámka: v&nbsp;této kapitole jsou uvedeny knihy
+o jazyku ML resp.&nbsp;Standard ML i knihy o programovacím jazyku OCaml, který
+ze Standard ML ze značné míry vychází. A samozřejmě nezapomeneme ani na knihy o
+jazyku F#:</div></p>
+
+<ol>
+
+<li>Get Programming with F#<br />
+<a href="https://www.manning.com/books/get-programming-with-f-sharp">https://www.manning.com/books/get-programming-with-f-sharp</a>
+</li>
+
+<li>F# for Scientists<br />
+<a href="https://www.amazon.com/F-Scientists-Jon-Harrop-ebook/dp/B005PS97RO">https://www.amazon.com/F-Scientists-Jon-Harrop-ebook/dp/B005PS97RO</a>
+</li>
+
+<li>Domain Modeling Made Functional<br />
+<a href="https://fsharpforfunandprofit.com/books/">https://fsharpforfunandprofit.com/books/</a>
+</li>
+
+<li>Functional Programming with F# (na Overleaf, tedy i se zdrojovými kódy)<br />
+<a href="https://www.overleaf.com/project/5bf2cb3cd9568d5a75bfcba9">https://www.overleaf.com/project/5bf2cb3cd9568d5a75bfcba9</a>
+</li>
+
+<li>Book of F#<br />
+<a href="https://nostarch.com/fsharp">https://nostarch.com/fsharp</a>
+</li>
+
+<li>F# Programming (Wikibook)<br />
+<a href="https://en.wikibooks.org/wiki/F_Sharp_Programming">https://en.wikibooks.org/wiki/F_Sharp_Programming</a>
+</li>
+
+<li>Stylish F#: Crafting Elegant Functional Code for .NET and .NET Core<br />
+<a href="https://www.amazon.com/dp/1484239997/">https://www.amazon.com/dp/1484239997/</a>
+</li>
+
+<li>ML for the Working Programmer<br />
+<a href="https://www.cl.cam.ac.uk/~lp15/MLbook/pub-details.html">https://www.cl.cam.ac.uk/~lp15/MLbook/pub-details.html</a>
+</li>
+
+<li>Elements of ML Programming, 2nd Edition (ML97)<br />
+<a href="http://infolab.stanford.edu/~ullman/emlp.html">http://infolab.stanford.edu/~ullman/emlp.html</a>
+</li>
+
+<li>A tour of Standard ML<br />
+<a href="https://saityi.github.io/sml-tour/tour/welcome">https://saityi.github.io/sml-tour/tour/welcome</a>
+</li>
+
+<li>The History of Standard ML<br />
+<a href="https://smlfamily.github.io/history/SML-history.pdf">https://smlfamily.github.io/history/SML-history.pdf</a>
+</li>
+
+<li>The Standard ML Basis Library<br />
+<a href="https://smlfamily.github.io/Basis/">https://smlfamily.github.io/Basis/</a>
+</li>
+
+<li>Programming in Standard ML<br />
+<a href="http://www.cs.cmu.edu/~rwh/isml/book.pdf">http://www.cs.cmu.edu/~rwh/isml/book.pdf</a>
+</li>
+
+<li>Programming in Standard ML '97: A Tutorial Introduction<br />
+<a href="http://www.lfcs.inf.ed.ac.uk/reports/97/ECS-LFCS-97-364/">http://www.lfcs.inf.ed.ac.uk/reports/97/ECS-LFCS-97-364/</a>
+</li>
+
+<li>Programming in Standard ML '97: An On-line Tutorial<br />
+<a href="https://homepages.inf.ed.ac.uk/stg/NOTES/">https://homepages.inf.ed.ac.uk/stg/NOTES/</a>
+</li>
+
+<li>The OCaml system  release 4.13<br />
+<a href="https://ocaml.org/releases/4.13/htmlman/index.html">https://ocaml.org/releases/4.13/htmlman/index.html</a>
+</li>
+
+<li>Real World OCaml: Functional programming for the masses<br />
+<a href="https://dev.realworldocaml.org/">https://dev.realworldocaml.org/</a>
+</li>
+
+<li>OCaml from the Very Beginning<br />
+<a href="http://ocaml-book.com/">http://ocaml-book.com/</a>
+</li>
+
+<li>OCaml from the Very Beginning: More OCaml : Algorithms, Methods &amp; Diversions<br />
+<a href="http://ocaml-book.com/more-ocaml-algorithms-methods-diversions/">http://ocaml-book.com/more-ocaml-algorithms-methods-diversions/</a>
+</li>
+
+<li>Unix system programming in OCaml<br />
+<a href="http://ocaml.github.io/ocamlunix/">http://ocaml.github.io/ocamlunix/</a>
+</li>
+
+<li>OCaml for Scientists<br />
+<a href="https://www.ffconsultancy.com/products/ocaml_for_scientists/index.html">https://www.ffconsultancy.com/products/ocaml_for_scientists/index.html</a>
+</li>
+
+<li>Using, Understanding, and Unraveling The OCaml Language<br />
+<a href="https://caml.inria.fr/pub/docs/u3-ocaml/">https://caml.inria.fr/pub/docs/u3-ocaml/</a>
+</li>
+
+<li>Developing Applications With objective Caml<br />
+<a href="https://caml.inria.fr/pub/docs/oreilly-book/index.html">https://caml.inria.fr/pub/docs/oreilly-book/index.html</a>
+</li>
+
+<li>Introduction to Objective Caml<br />
+<a href="http://courses.cms.caltech.edu/cs134/cs134b/book.pdf">http://courses.cms.caltech.edu/cs134/cs134b/book.pdf</a>
+</li>
+
+<li>How to Think Like a (Functional) Programmer<br />
+<a href="https://greenteapress.com/thinkocaml/index.html">https://greenteapress.com/thinkocaml/index.html</a>
+</li>
+
+</ol>
+
+
+
+<p><a name="k20"></a></p>
+<h2 id="k20">20. Odkazy na Internetu</h2>
+
+<ol>
+
+<li>General-Purpose, Industrial-Strength, Expressive, and Safe<br />
+<a href="https://ocaml.org/">https://ocaml.org/</a>
+</li>
+
+<li>OCaml playground<br />
+<a href="https://ocaml.org/play">https://ocaml.org/play</a>
+</li>
+
+<li>Online Ocaml Compiler IDE<br />
+<a href="https://www.jdoodle.com/compile-ocaml-online/">https://www.jdoodle.com/compile-ocaml-online/</a>
+</li>
+
+<li>Get Started - OCaml<br />
+<a href="https://www.ocaml.org/docs">https://www.ocaml.org/docs</a>
+</li>
+
+<li>Get Up and Running With OCaml<br />
+<a href="https://www.ocaml.org/docs/up-and-running">https://www.ocaml.org/docs/up-and-running</a>
+</li>
+
+<li>Better OCaml (Online prostředí)<br />
+<a href="https://betterocaml.ml/?version=4.14.0">https://betterocaml.ml/?version=4.14.0</a>
+</li>
+
+<li>OCaml file extensions<br />
+<a href="https://blog.waleedkhan.name/ocaml-file-extensions/">https://blog.waleedkhan.name/ocaml-file-extensions/</a>
+</li>
+
+<li>First thoughts on Rust vs OCaml<br />
+<a href="https://blog.darklang.com/first-thoughts-on-rust-vs-ocaml/">https://blog.darklang.com/first-thoughts-on-rust-vs-ocaml/</a>
+</li>
+
+<li>Standard ML of New Jersey<br />
+<a href="https://www.smlnj.org/">https://www.smlnj.org/</a>
+</li>
+
+<li>Programming Languages: Standard ML - 1 (a navazující videa)<br />
+<a href="https://www.youtube.com/watch?v=2sqjUWGGzTo">https://www.youtube.com/watch?v=2sqjUWGGzTo</a>
+</li>
+
+<li>6 Excellent Free Books to Learn Standard ML<br />
+<a href="https://www.linuxlinks.com/excellent-free-books-learn-standard-ml/">https://www.linuxlinks.com/excellent-free-books-learn-standard-ml/</a>
+</li>
+
+<li>SOSML: The Online Interpreter for Standard ML<br />
+<a href="https://sosml.org/">https://sosml.org/</a>
+</li>
+
+<li>ML (Computer program language)<br />
+<a href="https://www.barnesandnoble.com/b/books/other-programming-languages/ml-computer-program-language/_/N-29Z8q8Zvy7">https://www.barnesandnoble.com/b/books/other-programming-languages/ml-computer-program-language/_/N-29Z8q8Zvy7</a>
+</li>
+
+<li>Strong Typing<br />
+<a href="https://perl.plover.com/yak/typing/notes.html">https://perl.plover.com/yak/typing/notes.html</a>
+</li>
+
+<li>What to know before debating type systems<br />
+<a href="http://blogs.perl.org/users/ovid/2010/08/what-to-know-before-debating-type-systems.html">http://blogs.perl.org/users/ovid/2010/08/what-to-know-before-debating-type-systems.html</a>
+</li>
+
+<li>Types, and Why You Should Care (Youtube)<br />
+<a href="https://www.youtube.com/watch?v=0arFPIQatCU">https://www.youtube.com/watch?v=0arFPIQatCU</a>
+</li>
+
+<li>DynamicTyping (Martin Fowler)<br />
+<a href="https://www.martinfowler.com/bliki/DynamicTyping.html">https://www.martinfowler.com/bliki/DynamicTyping.html</a>
+</li>
+
+<li>DomainSpecificLanguage (Martin Fowler)<br />
+<a href="https://www.martinfowler.com/bliki/DomainSpecificLanguage.html">https://www.martinfowler.com/bliki/DomainSpecificLanguage.html</a>
+</li>
+
+<li>Language Workbenches: The Killer-App for Domain Specific Languages?<br />
+<a href="https://www.martinfowler.com/articles/languageWorkbench.html">https://www.martinfowler.com/articles/languageWorkbench.html</a>
+</li>
+
+<li>Effective ML (Youtube)<br />
+<a href="https://www.youtube.com/watch?v=-J8YyfrSwTk">https://www.youtube.com/watch?v=-J8YyfrSwTk</a>
+</li>
+
+<li>Why OCaml (Youtube)<br />
+<a href="https://www.youtube.com/watch?v=v1CmGbOGb2I">https://www.youtube.com/watch?v=v1CmGbOGb2I</a>
+</li>
+
+<li>CSE 341: Functions and patterns<br />
+<a href="https://courses.cs.washington.edu/courses/cse341/04wi/lectures/03-ml-functions.html">https://courses.cs.washington.edu/courses/cse341/04wi/lectures/03-ml-functions.html</a>
+</li>
+
+<li>Comparing Objective Caml and Standard ML<br />
+<a href="http://adam.chlipala.net/mlcomp/">http://adam.chlipala.net/mlcomp/</a>
+</li>
+
+<li>What are the key differences between Standard ML and OCaml?<br />
+<a href="https://www.quora.com/What-are-the-key-differences-between-Standard-ML-and-OCaml?share=1">https://www.quora.com/What-are-the-key-differences-between-Standard-ML-and-OCaml?share=1</a>
+</li>
+
+<li>Cheat Sheets (pro OCaml)<br />
+<a href="https://www.ocaml.org/docs/cheat_sheets.html">https://www.ocaml.org/docs/cheat_sheets.html</a>
+</li>
+
+<li>Syllabus (FAS CS51)<br />
+<a href="https://cs51.io/college/syllabus/">https://cs51.io/college/syllabus/</a>
+</li>
+
+<li>Abstraction and Design In Computation<br />
+<a href="http://book.cs51.io/">http://book.cs51.io/</a>
+</li>
+
+<li>Learn X in Y minutes Where X=Standard ML<br />
+<a href="https://learnxinyminutes.com/docs/standard-ml/">https://learnxinyminutes.com/docs/standard-ml/</a>
+</li>
+
+<li>CSE307 Online - Summer 2018: Principles of Programing Languages course<br />
+<a href="https://www3.cs.stonybrook.edu/~pfodor/courses/summer/cse307.html">https://www3.cs.stonybrook.edu/~pfodor/courses/summer/cse307.html</a>
+</li>
+
+<li>CSE307 Principles of Programming Languages course: SML part 1<br />
+<a href="https://www.youtube.com/watch?v=p1n0_PsM6hw">https://www.youtube.com/watch?v=p1n0_PsM6hw</a>
+</li>
+
+<li>CSE 307 &ndash; Principles of Programming Languages &ndash; SML<br />
+<a href="https://www3.cs.stonybrook.edu/~pfodor/courses/summer/CSE307/L01_SML.pdf">https://www3.cs.stonybrook.edu/~pfodor/courses/summer/CSE307/L01_SML.pdf</a>
+</li>
+
+<li>SML, Some Basic Examples<br />
+<a href="https://cs.fit.edu/~ryan/sml/intro.html">https://cs.fit.edu/~ryan/sml/intro.html</a>
+</li>
+
+<li>History of programming languages<br />
+<a href="https://devskiller.com/history-of-programming-languages/">https://devskiller.com/history-of-programming-languages/</a>
+</li>
+
+<li>History of programming languages (Wikipedia)<br />
+<a href="https://en.wikipedia.org/wiki/History_of_programming_languages">https://en.wikipedia.org/wiki/History_of_programming_languages</a>
+</li>
+
+<li>Jemný úvod do rozsáhlého světa jazyků LISP a Scheme<br />
+<a href="https://www.root.cz/clanky/jemny-uvod-do-rozsahleho-sveta-jazyku-lisp-a-scheme/">https://www.root.cz/clanky/jemny-uvod-do-rozsahleho-sveta-jazyku-lisp-a-scheme/</a>
+</li>
+
+<li>The Evolution Of Programming Languages<br />
+<a href="https://www.i-programmer.info/news/98-languages/8809-the-evolution-of-programming-languages.html">https://www.i-programmer.info/news/98-languages/8809-the-evolution-of-programming-languages.html</a>
+</li>
+
+<li>Evoluce programovacích jazyků<br />
+<a href="https://ccrma.stanford.edu/courses/250a-fall-2005/docs/ComputerLanguagesChart.png">https://ccrma.stanford.edu/courses/250a-fall-2005/docs/ComputerLanguagesChart.png</a>
+</li>
+
+<li>Poly/ML Homepage<br />
+<a href="https://polyml.org/">https://polyml.org/</a>
+</li>
+
+<li>PolyConf 16: A brief history of F# / Rachel Reese<br />
+<a href="https://www.youtube.com/watch?v=cbDjpi727aY">https://www.youtube.com/watch?v=cbDjpi727aY</a>
+</li>
+
+<li>Programovací jazyk Clojure 18: základní techniky optimalizace aplikací<br />
+<a href="https://www.root.cz/clanky/programovaci-jazyk-clojure-18-zakladni-techniky-optimalizace-aplikaci/">https://www.root.cz/clanky/programovaci-jazyk-clojure-18-zakladni-techniky-optimalizace-aplikaci/</a>
+</li>
+
+<li>Moscow ML Language Overview<br />
+<a href="https://itu.dk/people/sestoft/mosml/mosmlref.pdf">https://itu.dk/people/sestoft/mosml/mosmlref.pdf</a>
+</li>
+
+<li>ForLoops<br />
+<a href="http://mlton.org/ForLoops">http://mlton.org/ForLoops</a>
+</li>
+
+<li>Funkcionální dobrodružství v&nbsp;JavaScriptu<br />
+<a href="https://blog.kolman.cz/2015/12/funkcionalni-dobrodruzstvi-v-javascriptu.html">https://blog.kolman.cz/2015/12/funkcionalni-dobrodruzstvi-v-javascriptu.html</a>
+</li>
+
+<li>Recenze knihy Functional Thinking (Paradigm over syntax)<br />
+<a href="https://www.root.cz/clanky/recenze-knihy-functional-thinking-paradigm-over-syntax/">https://www.root.cz/clanky/recenze-knihy-functional-thinking-paradigm-over-syntax/</a>
+</li>
+
+<li>Currying<br />
+<a href="https://sw-samuraj.cz/2011/02/currying/">https://sw-samuraj.cz/2011/02/currying/</a>
+</li>
+
+<li>Používání funkcí v&nbsp;F#<br />
+<a href="https://docs.microsoft.com/cs-cz/dotnet/fsharp/tutorials/using-functions">https://docs.microsoft.com/cs-cz/dotnet/fsharp/tutorials/using-functions</a>
+</li>
+
+<li>Funkce vyššího řádu<br />
+<a href="http://naucte-se.haskell.cz/funkce-vyssiho-radu">http://naucte-se.haskell.cz/funkce-vyssiho-radu</a>
+</li>
+
+<li>Currying (Wikipedia)<br />
+<a href="https://en.wikipedia.org/wiki/Currying">https://en.wikipedia.org/wiki/Currying</a>
+</li>
+
+<li>Currying (Haskell wiki)<br />
+<a href="https://wiki.haskell.org/Currying">https://wiki.haskell.org/Currying</a>
+</li>
+
+<li>Haskell Curry<br />
+<a href="https://en.wikipedia.org/wiki/Haskell_Curry">https://en.wikipedia.org/wiki/Haskell_Curry</a>
+</li>
+
+<li>Moses Schönfinkel<br />
+<a href="https://en.wikipedia.org/wiki/Moses_Sch%C3%B6nfinkel">https://en.wikipedia.org/wiki/Moses_Sch%C3%B6nfinkel</a>
+</li>
+
+<li>.NET framework<br />
+<a href="https://dotnet.microsoft.com/en-us/">https://dotnet.microsoft.com/en-us/</a>
+</li>
+
+<li>F# - .NET Blog<br />
+<a href="https://devblogs.microsoft.com/dotnet/category/fsharp/">https://devblogs.microsoft.com/dotnet/category/fsharp/</a>
+</li>
+
+<li>Playground: OCaml<br />
+<a href="https://ocaml.org/play">https://ocaml.org/play</a>
+</li>
+
+<li>The F# Survival Guide<br />
+<a href="https://web.archive.org/web/20110715231625/http://www.ctocorner.com/fsharp/book/default.aspx">https://web.archive.org/web/20110715231625/http://www.ctocorner.com/fsharp/book/default.aspx</a>
+</li>
+
+<li>Object-Oriented Programming — The Trillion Dollar Disaster<br />
+<a href="https://betterprogramming.pub/object-oriented-programming-the-trillion-dollar-disaster-92a4b666c7c7">https://betterprogramming.pub/object-oriented-programming-the-trillion-dollar-disaster-92a4b666c7c7</a>
+</li>
+
+<li>Goodbye, Object Oriented Programming<br />
+<a href="https://cscalfani.medium.com/goodbye-object-oriented-programming-a59cda4c0e53">https://cscalfani.medium.com/goodbye-object-oriented-programming-a59cda4c0e53</a>
+</li>
+
+<li>So You Want to be a Functional Programmer (Part 1)<br />
+<a href="https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-1-1f15e387e536">https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-1-1f15e387e536</a>
+</li>
+
+<li>So You Want to be a Functional Programmer (Part 2)<br />
+<a href="https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-2-7005682cec4a">https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-2-7005682cec4a</a>
+</li>
+
+<li>So You Want to be a Functional Programmer (Part 3)<br />
+<a href="https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-3-1b0fd14eb1a7">https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-3-1b0fd14eb1a7</a>
+</li>
+
+<li>So You Want to be a Functional Programmer (Part 4)<br />
+<a href="https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-4-18fbe3ea9e49">https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-4-18fbe3ea9e49</a>
+</li>
+
+<li>So You Want to be a Functional Programmer (Part 5)<br />
+<a href="https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-5-c70adc9cf56a">https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-5-c70adc9cf56a</a>
+</li>
+
+<li>So You Want to be a Functional Programmer (Part 6)<br />
+<a href="https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-6-db502830403">https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-6-db502830403</a>
+</li>
+
+<li>Why Programmers Need Limits<br />
+<a href="https://cscalfani.medium.com/why-programmers-need-limits-3d96e1a0a6db">https://cscalfani.medium.com/why-programmers-need-limits-3d96e1a0a6db</a>
+</li>
+
+<li>Signatures<br />
+<a href="https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/signature-files">https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/signature-files</a>
+</li>
+
+<li>F# for Linux People<br />
+<a href="https://carpenoctem.dev/blog/fsharp-for-linux-people/">https://carpenoctem.dev/blog/fsharp-for-linux-people/</a>
+</li>
+
+<li>Ionide project<br />
+<a href="https://ionide.io/">https://ionide.io/</a>
+</li>
+
+<li>FsAutoComplete<br />
+<a href="https://ionide.io/Tools/fsac.html">https://ionide.io/Tools/fsac.html</a>
+</li>
+
+<li>Interactive (.NET for Jupyter Notebook)<br />
+<a href="https://github.com/dotnet/interactive/#jupyter-and-nteract">https://github.com/dotnet/interactive/#jupyter-and-nteract</a>
+</li>
+
+<li>let Bindings<br />
+<a href="https://github.com/dotnet/docs/blob/main/docs/fsharp/language-reference/functions/let-bindings.md">https://github.com/dotnet/docs/blob/main/docs/fsharp/language-reference/functions/let-bindings.md</a>
+</li>
+
+<li>Lambda Expressions: The fun Keyword (F#)<br />
+<a href="https://github.com/dotnet/docs/blob/main/docs/fsharp/language-reference/functions/lambda-expressions-the-fun-keyword.md">https://github.com/dotnet/docs/blob/main/docs/fsharp/language-reference/functions/lambda-expressions-the-fun-keyword.md</a>
+</li>
+
+<li>Infographic showing code complexity vs developer experience<br />
+<a href="https://twitter.com/rossipedia/status/1580639227313676288">https://twitter.com/rossipedia/status/1580639227313676288</a>
+</li>
+
+<li>OCaml for the Masses: Why the next language you learn should be functional<br />
+<a href="https://queue.acm.org/detail.cfm?id=2038036">https://queue.acm.org/detail.cfm?id=2038036</a>
+</li>
+
+<li>Try EIO<br />
+<a href="https://patricoferris.github.io/try-eio/">https://patricoferris.github.io/try-eio/</a>
+</li>
+
+<li>Try OCaml<br />
+<a href="https://try.ocaml.pro/">https://try.ocaml.pro/</a>
+</li>
+
+<li>ML &ndash; funkcionální jazyk s revolučním typovým systémem<br />
+<a href="https://www.root.cz/clanky/ml-funkcionalni-jazyk-s-revolucnim-typovym-systemem/">https://www.root.cz/clanky/ml-funkcionalni-jazyk-s-revolucnim-typovym-systemem/</a>
+</li>
+
+<li>Funkce a typový systém programovacího jazyka ML<br />
+<a href="https://www.root.cz/clanky/funkce-a-typovy-system-programovaciho-jazyka-ml/">https://www.root.cz/clanky/funkce-a-typovy-system-programovaciho-jazyka-ml/</a>
+</li>
+
+<li>Curryfikace (currying), výjimky a vlastní operátory v jazyku ML<br />
+<a href="https://www.root.cz/clanky/curryfikace-currying-vyjimky-a-vlastni-operatory-v-jazyku-ml/">https://www.root.cz/clanky/curryfikace-currying-vyjimky-a-vlastni-operatory-v-jazyku-ml/</a>
+</li>
+
+<li>Operátor J (Wikipedia)<br />
+<a href="https://en.wikipedia.org/wiki/J_operator">https://en.wikipedia.org/wiki/J_operator</a>
+</li>
+
+<li>Standard ML (Wikipedia)<br />
+<a href="https://en.wikipedia.org/wiki/Standard_ML">https://en.wikipedia.org/wiki/Standard_ML</a>
+</li>
+
+<li>Don Syme<br />
+<a href="https://en.wikipedia.org/wiki/Don_Syme">https://en.wikipedia.org/wiki/Don_Syme</a>
+</li>
+
+<li>Python to OCaml: Retrospective<br />
+<a href="http://roscidus.com/blog/blog/2014/06/06/python-to-ocaml-retrospective/">http://roscidus.com/blog/blog/2014/06/06/python-to-ocaml-retrospective/</a>
+</li>
+
+<li>Xavier Leroy<br />
+<a href="https://en.wikipedia.org/wiki/Xavier_Leroy">https://en.wikipedia.org/wiki/Xavier_Leroy</a>
+</li>
+
+<li>Unit type<br />
+<a href="https://en.wikipedia.org/wiki/Unit_type">https://en.wikipedia.org/wiki/Unit_type</a>
+</li>
+
+</ol>
+
+
+
+<p></p><p></p>
+<p><small>Autor: <a href="http://www.fit.vutbr.cz/~tisnovpa">Pavel Tišnovský</a> &nbsp; 2023</small></p>
+</body>
+</html>
