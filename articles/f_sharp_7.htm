@@ -2,7 +2,7 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <head>
-<title></title>
+<title>Definice uživatelských datových typů v jazyku F#</title>
 <meta name="Author" content="Pavel Tisnovsky" />
 <meta name="Generator" content="vim" />
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
@@ -23,7 +23,7 @@
 
 <body>
 
-<h1></h1>
+<h1>Definice uživatelských datových typů v jazyku F#</h1>
 
 <h3>Pavel Tišnovský</h3>
 
@@ -31,117 +31,1021 @@
 
 <h1>Úvodník</h1>
 
-<p></p>
+<p>Prozatím jsme si do značné míry vystačili se základními datovými typy jazyka F#. Ovšem velká síla tohoto jazyka spočívá v principu deklarace nových datových typů. Podporován je algebraický typový systém, ale například i možnost deklarace tříd s jejich hierarchií.</p>
 
 
 
 <h2>Obsah</h2>
 
-<p><a href="#k01">*** 1. </a></p>
-<p><a href="#k02">*** 2. </a></p>
-<p><a href="#k03">*** 3. </a></p>
-<p><a href="#k04">*** 4. </a></p>
-<p><a href="#k05">*** 5. </a></p>
-<p><a href="#k06">*** 6. </a></p>
-<p><a href="#k07">*** 7. </a></p>
-<p><a href="#k08">*** 8. </a></p>
-<p><a href="#k09">*** 9. </a></p>
-<p><a href="#k10">*** 10. </a></p>
-<p><a href="#k11">*** 11. </a></p>
-<p><a href="#k12">*** 12. </a></p>
-<p><a href="#k13">*** 13. </a></p>
-<p><a href="#k14">*** 14. </a></p>
-<p><a href="#k15">*** 15. </a></p>
-<p><a href="#k16">*** 16. </a></p>
-<p><a href="#k17">*** 17. </a></p>
-<p><a href="#k18">*** 18. Repositář s&nbsp;demonstračními příklady</a></p>
-<p><a href="#k19">*** 19. Literatura</a></p>
-<p><a href="#k20">*** 20. Odkazy na Internetu</a></p>
+<p><a href="#k01">1. Definice uživatelských datových typů v&nbsp;jazyku F#</a></p>
+<p><a href="#k02">2. Datový typ záznam (<i>record</i>)</a></p>
+<p><a href="#k03">3. Typová inference při definici funkcí</a></p>
+<p><a href="#k04">4. Chování algoritmu typové inference v&nbsp;případě dvou struktur se shodnými prvky</a></p>
+<p><a href="#k05">5. Datový typ výčet (<i>enum</i>)</a></p>
+<p><a href="#k06">6. Datový typ disjunktní sjednocení (<i>discriminated union</i>)</a></p>
+<p><a href="#k07">7. N-tice</a></p>
+<p><a href="#k08">8. N-tice a pattern matching</a></p>
+<p><a href="#k09">9. Od n-tic k&nbsp;sofistikovanějším disjunktním sjednocením</a></p>
+<p><a href="#k10">10. Disjunktní sjednocení s&nbsp;prvky typu n-tice</a></p>
+<p><a href="#k11">11. Rekurzivní datové typy</a></p>
+<p><a href="#k12">12. Datový typ třída (<i>class</i>)</a></p>
+<p><a href="#k13">13. Lokální symbol v&nbsp;deklaraci třídy</a></p>
+<p><a href="#k14">14. Konstrukce nové instance třídy realizovaná v&nbsp;metodě</a></p>
+<p><a href="#k15">15. Operátory definované v&nbsp;rámci uživatelského datového typu</a></p>
+<p><a href="#k16">16. Dědičnost</a></p>
+<p><a href="#k17">17. Operátor <strong>upcast</strong>: přetypování na předka</a></p>
+<p><a href="#k18">18. Repositář s&nbsp;demonstračními příklady</a></p>
+<p><a href="#k19">19. Literatura</a></p>
+<p><a href="#k20">20. Odkazy na Internetu</a></p>
 
 
 
 <p><a name="k01"></a></p>
-<h2 id="k01">1. </h2>
+<h2 id="k01">1. Definice uživatelských datových typů v&nbsp;jazyku F#</h2>
+
+<p>Prozatím jsme si <a
+href="https://www.root.cz/serialy/f-a-ocaml/">v&nbsp;seriálu o programovacích
+jazycích OCaml a F#</a> do značné míry vystačili se základními datovými typy
+programovacího jazyka F# (resp.&nbsp;OCamlu). Ovšem velká síla těchto dvou
+programovacích jazyků spočívá v&nbsp;principu deklarace nových datových typů.
+Podporován je takzvaný <i>algebraický typový systém</i> (který byl v&nbsp;OCaml
+dále rozšířen), ale například i možnost deklarace tříd a specifikace jejich
+hierarchie (i když v&nbsp;F# ani v&nbsp;OCamlu není tak velký
+&bdquo;tlak&ldquo; na použití tříd, a to právě díky možnostem poskytovaných
+ostatními datovými typy).</p>
+
+<p>V&nbsp;mnoha demonstračních příkladech uvedených v&nbsp;navazujících
+kapitolách se navíc setkáme s&nbsp;tím, že operace nad různými datovými typy
+jsou prováděny s&nbsp;využitím <i>pattern matchingu</i>, přičemž stojí za
+povšimnutí, že <i>konstrukce</i> hodnoty určitého datového typu vypadá po
+syntaktické stránce prakticky stejně, jako <i>dekonstrukce</i> hodnoty na její
+prvky v&nbsp;bloku <strong>match</strong>. To je poměrně typický rys pattern
+matchingu, který byl do určité míry přejat i do dalších programovacích jazyků,
+které dnes pattern matching podporují.</p>
+
+<p><div class="rs-tip-major">Poznámka: opět platí, že všechny dále uvedené
+demonstrační příklady je možné si vyzkoušet ve webové aplikaci <a
+href="https://try.fsharp.org/">Try F#</a>.</div></p>
 
 
 
 <p><a name="k02"></a></p>
-<h2 id="k02">2. </h2>
+<h2 id="k02">2. Datový typ záznam (<i>record</i>)</h2>
+
+<p>V&nbsp;mnoha oblastech se používá datový typ záznam (<i>record</i>).
+V&nbsp;záznamech mohou být uloženy prvky (resp.&nbsp;přesněji řečeno složky)
+libovolného typu, ovšem na rozdíl od již popsaných n-tic (<i>tuple</i>) jsou
+tyto prvky pojmenovány a lze k&nbsp;nim přistupovat s&nbsp;využitím známé
+tečkové notace (tečka přitom není v&nbsp;tomto kontextu operátor, ale znak se
+speciálním významem &ndash; <i>special symbol</i>). U záznamů je, na rozdíl od
+n-tic, seznamů či polí, již nutné definovat nový datový typ s&nbsp;explicitním
+určením typů jednotlivých položek.</p>
+
+<p>Jak práce se seznamy vypadá v&nbsp;praxi? Datový typ <strong>User</strong>
+se třemi složkami může být definován následujícím způsobem:</p>
+
+<pre>
+type <strong>User</strong> =
+    { ID: int
+      Name: string
+      Surname: string}
+</pre>
+
+<p>Vytvoření proměnné s&nbsp;hodnotou tohoto typu se zapisuje stylem, který je
+ukázán pod tímto odstavcem:</p>
+
+<pre>
+let <strong>pepa</strong> =
+    { ID = 42
+      Name = "Josef"
+      Surname = "Vyskočil"}
+&nbsp;
+&nbsp;
+printf "%A\n" pepa
+</pre>
+
+<p>Samozřejmě si můžeme v&nbsp;případě potřeby nadeklarovat i funkci (například
+pojmenovanou <strong>print_name</strong>), která akceptuje parametr typu
+záznam. V&nbsp;této funkci navíc budeme přistupovat ke složkám záznamu
+s&nbsp;využitím dnes již téměř univerzální &bdquo;tečkové notace&ldquo;:</p>
+
+<pre>
+type <strong>User</strong> =
+    { ID: int
+      Name: string
+      Surname: string}
+&nbsp;
+let <strong>print_name</strong> (x:User) =
+    printf "%s %s" x.Name x.Surname
+&nbsp;
+let pepa =
+    { ID = 42
+      Name = "Josef"
+      Surname = "Vyskočil"}
+&nbsp;
+&nbsp;
+print_name pepa
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: prakticky totožným způsobem bylo možné
+se záznamy pracovat již v&nbsp;původním jazyku ML, od nějž je odvozen jak jazyk
+OCaml, tak i programovací jazyk F#.</div></p>
 
 
 
 <p><a name="k03"></a></p>
-<h2 id="k03">3. </h2>
+<h2 id="k03">3. Typová inference při definici funkcí</h2>
+
+<p>Již několikrát jsme se <a
+href="https://www.root.cz/serialy/f-a-ocaml/">v&nbsp;tomto seriálu</a> setkali
+s&nbsp;tím, že programovací jazyky OCaml a F# používají sofistikovaný
+algoritmus pro typovou inferenci (<i>type inference</i>), který například
+dokáže doplnit typ parametrů do definované funkce, a to na základě jejího těla.
+Můžeme si tedy vyzkoušet upravit funkci <a href="#k02">z&nbsp;předchozí
+kapitoly</a>. Původní tvar této funkce explicitně specifikoval typ
+parametrů:</p>
+
+<pre>
+let <strong>print_name</strong> (x:User) =
+    printf "%s %s" x.Name x.Surname
+</pre>
+
+<p>Ovšem v&nbsp;tomto případě (až na výjimky zmíněné níže) můžeme funkci napsat
+jednodušeji a přitom bude stále silně typovaná:</p>
+
+<pre>
+let <strong>print_name</strong> x =
+    printf "%s %s" x.Name x.Surname
+</pre>
+
+<p>Následující skript je korektní a plně funkční:</p>
+
+<pre>
+type <strong>User</strong> =
+    { ID: int
+      Name: string
+      Surname: string}
+&nbsp;
+let <strong>print_name</strong> x =
+    printf "%s %s" x.Name x.Surname
+&nbsp;
+let pepa =
+    { ID = 42
+      Name = "Josef"
+      Surname = "Vyskočil"}
+&nbsp;
+&nbsp;
+print_name pepa
+</pre>
 
 
 
 <p><a name="k04"></a></p>
-<h2 id="k04">4. </h2>
+<h2 id="k04">4. Chování algoritmu typové inference v&nbsp;případě dvou struktur se shodnými prvky</h2>
+
+<p>Při pohledu na demonstrační příklad <a href="#k03">z&nbsp;předchozí
+kapitoly</a> by se mohlo zdát, že algoritmus pro typovou inferenci odvozuje typ
+parametrů funkcí podle toho, s&nbsp;jakými skutečnými hodnotami jsou funkce
+volány. Ovšem snadno se můžeme přesvědčit, že to není (zcela) pravda.
+V&nbsp;dalším skriptu jsou deklarovány dva datové typy <strong>User</strong> a
+<strong>UserWithoutID</strong>, které mají položky se stejným jménem
+<strong>Name</strong> a <strong>Surname</strong>. Ve funkci
+<strong>print_name</strong> se pracuje jen s&nbsp;položkami
+<strong>Name</strong> a <strong>Surname</strong>, takže typová inference
+odvodí, že by se mohlo jednat o parametr typu <strong>UserWithoutID</strong>.
+Ovšem ve skutečnosti bude funkce volána s&nbsp;parametrem typu
+<strong>User</strong>, což vede k&nbsp;chybě při překladu:</p>
+
+<pre>
+type <strong>User</strong> = 
+    { ID: int
+      Name: string
+      Surname: string}
+&nbsp;
+type <strong>UserWithoutID</strong> = 
+    { Name: string
+      Surname: string}
+&nbsp;
+let <strong>print_name</strong> x =
+    printf "%s %s" x.Name x.Surname
+&nbsp;
+let pepa =
+    { ID = 42
+      Name = "Josef"
+      Surname = "Vyskočil"}
+&nbsp;
+&nbsp;
+<i>(* nefunkcni varianta *)</i>
+print_name pepa
+</pre>
+
+<p>Řešením je explicitní specifikace typu parametru funkce
+<strong>print_name</strong> (viz podtržená část kódu):</p>
+
+<pre>
+type <strong>User</strong> = 
+    { ID: int
+      Name: string
+      Surname: string}
+&nbsp;
+type <strong>UserWithoutID</strong> = 
+    { Name: string
+      Surname: string}
+&nbsp;
+let <strong>print_name</strong> (<u>x:User</u>) =
+    printf "%s %s" x.Name x.Surname
+&nbsp;
+let pepa =
+    { ID = 42
+      Name = "Josef"
+      Surname = "Vyskočil"}
+&nbsp;
+&nbsp;
+<i>(* funkcni varianta *)</i>
+print_name pepa
+</pre>
 
 
 
 <p><a name="k05"></a></p>
-<h2 id="k05">5. </h2>
+<h2 id="k05">5. Datový typ výčet (<i>enum</i>)</h2>
+
+<p>Dalším způsobem, jak v&nbsp;programovacím jazyku F# definovat datový typ, je
+definice výčtu (<i>enum</i>). Je to snadné, protože pouze postačuje
+specifikovat názvy a hodnoty jednotlivých prvků uložených ve výčtu. Hodnoty se
+získají snadno &ndash; opět se použije tečková notace:</p>
+
+<pre>
+type <strong>Day</strong> = Po=1 | Ut=2 | St=3 | Ct=4 | Pa=5 | So=6 | Ne=7
+&nbsp;
+let x = Day.St
+&nbsp;
+printf "%A\n" x
+</pre>
+
+<p>Alternativní způsob zápisu výčtu vypadá takto (použitý je pro delší názvy či
+hodnoty):</p>
+
+<pre>
+type Day =
+     | Po=1
+     | Ut=2
+     | St=3
+     | Ct=4
+     | Pa=5
+     | So=6
+     | Ne=7
+let x = Day.St
+printf "%A\n" x
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: samozřejmě nejsme omezeni jen na hodnoty
+typu celé číslo.</div></p>
 
 
 
 <p><a name="k06"></a></p>
-<h2 id="k06">6. </h2>
+<h2 id="k06">6. Datový typ disjunktní sjednocení (<i>discriminated union</i>)</h2>
+
+<p>Velmi důležitým datovým typem je v&nbsp;programovacím jazyku F# typ nazývaný
+disjunktní sjednocení neboli <i>discriminated union</i>. V&nbsp;té
+nejjednodušší podobě může být tento typ definován pouhým výčtem možností:</p>
+
+<pre>
+type <strong>Day</strong> = Po | Ut | St | Ct | Pa | So | Ne
+&nbsp;
+let x = St
+&nbsp;
+printf "%A\n" x
+</pre>
+
+<p>Alternativní způsob zápisu:</p>
+
+<pre>
+type <strong>Day</strong> =
+     | Po
+     | Ut
+     | St
+     | Ct
+     | Pa
+     | So
+     | Ne
+let x = St
+printf "%A\n" x
+</pre>
+
+<p>Až doposud by se mohlo zdát, že se vlastně jedná o typ výčet, ovšem možnosti
+disjunktního sjednocení jsou mnohem větší. Již jsme se setkali s&nbsp;typy
+<strong>Option</strong> a <strong>Result</strong>:</p>
+
+<pre>
+type <strong>Option&lt;'a&gt;</strong> =
+   | Some of 'a
+   | None
+</pre>
+
+<p>a:</p>
+
+<pre>
+type <strong>Result&lt;'T,'TError&gt;</strong> =
+    | Ok of ResultValue:'T
+    | Error of ErrorValue:'TError
+</pre>
+
+<p>Další podobné konstrukce budou uvedeny v&nbsp;navazujících kapitolách.</p>
+
+<p><div class="rs-tip-major">Poznámka: jedná se o ukázku <i>součtových datových
+typů</i>.</div></p>
 
 
 
 <p><a name="k07"></a></p>
-<h2 id="k07">7. </h2>
+<h2 id="k07">7. N-tice</h2>
+
+<p>O tom, jak se vytváří hodnoty typu n-tice (<i>tuple</i>) jsme si již
+v&nbsp;tomto seriálu říkali. Postačuje napsat například:</p>
+
+<pre>
+let x = <strong>(1, 1.5, "foo", (1,2)) ;;</strong>
+</pre>
+
+<p>přičemž výsledkem bude hodnota typu:</p>
+
+<pre>
+int * float * string * (int * int)
+</pre>
+
+<p>Za povšimnutí stojí především zápis * mezi typy jednotlivých prvků, což
+napovídá, že na rozdíl předchozího typu se v&nbsp;tomto případě nejedná o
+<i>součtový datový typ</i>, ale naopak o <i>součinový datový typ</i> (existuje
+jen jedna varianta).</p>
+
+<p>Konkrétní typ n-tice si samozřejmě můžeme snadno zadefinovat a může se tak
+jednat o určitou alternativu k&nbsp;záznamům. V&nbsp;dalším příkladu je ukázán
+neidiomatický způsob získání jednotlivých hodnot prvků z&nbsp;n-tice
+s&nbsp;využitím vnořeného bloku <strong>let</strong>:</p>
+
+<pre>
+type <strong>Rectangle</strong> = int * int
+&nbsp;
+let <strong>print_rectange</strong> r =
+    let (width, height) = r in
+        printf "rect: %dx%d\n" width height
+&nbsp;
+let r1 = (10, 20)
+&nbsp;
+print_rectange r1
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: pro jazyk F# je typické, že při pattern
+matchingu je samotný vzorek (<i>pattern</i>) zapisován stejně jako konstruktor
+daného typu. Tedy pokud se konstruktor zapisuje ve tvaru <strong>(položka1,
+položka2)</strong> bude vzorek vypadat syntakticky stejně.</div></p>
 
 
 
 <p><a name="k08"></a></p>
-<h2 id="k08">8. </h2>
+<h2 id="k08">8. N-tice a pattern matching</h2>
+
+<p>Při čtení prvků z&nbsp;n-tice se mnohdy setkáme s&nbsp;využitím <i>pattern
+matchingu</i>, který v&nbsp;tomto případě může mít jen jedinou větev. Podívejme
+se na následující příklad, v&nbsp;němž z&nbsp;n-tice obsahující šířku a výšku
+obdélníku získáme obě délky v&nbsp;samostatných lokálních proměnných
+<strong>width</strong> a <strong>height</strong>:</p>
+
+<pre>
+type <strong>Rectangle</strong> = int * int
+&nbsp;
+let <strong>print_rectange</strong> (r : Rectangle) =
+    match r with
+    | (width, height) -&gt; printf "rect: %dx%d\n" width height
+&nbsp;
+let r1 = (10, 20)
+&nbsp;
+print_rectange r1
+</pre>
 
 
 
 <p><a name="k09"></a></p>
-<h2 id="k09">9. </h2>
+<h2 id="k09">9. Od n-tic k&nbsp;sofistikovanějším disjunktním sjednocením</h2>
+
+<p>Mnohdy se taktéž setkáme s&nbsp;následujícím zápisem, který nás již
+připravuje na seznámení se s&nbsp;dalšími možnostmi zápisu disjunktního
+sjednocení (<i>discriminated union</i>) &ndash; viz další kapitoly:</p>
+
+<pre>
+type <strong>Rectangle</strong> = R of int * int
+&nbsp;
+let <strong>print_rectange</strong> (r : Rectangle) =
+    match r with
+    | R(width, height) -&gt; printf "rect: %dx%d\n" width height
+&nbsp;
+let r1 = R(10, 20)
+&nbsp;
+print_rectange r1
+</pre>
+
+<p>Můžeme dokonce rozlišit mezi jménem typu a jménem položky &ndash;
+identifikátory jsou stejné, ovšem mají odlišný význam:</p>
+
+<pre>
+type <strong>Rectangle</strong> = Rectangle of int * int
+&nbsp;
+let <strong>print_rectange</strong> (r : Rectangle) =
+    match r with
+    | Rectangle(width, height) -&gt; printf "rect: %dx%d\n" width height
+&nbsp;
+let r1 = Rectangle(10, 20)
+&nbsp;
+print_rectange r1
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: předchozí příklad ukazuji proto, že se
+s&nbsp;ním lze setkat, i když je dosti matoucí. I když jazyk F# tento zápis
+umožňuje, je vhodnější mít identifikátory s&nbsp;unikátními jmény, i když je
+každý používán v&nbsp;jiném kontextu (tomu se ovšem v&nbsp;praxi stejně
+nevyhneme).</div></p>
 
 
 
 <p><a name="k10"></a></p>
-<h2 id="k10">10. </h2>
+<h2 id="k10">10. Disjunktní sjednocení s&nbsp;prvky typu n-tice</h2>
+
+<p>Nyní se dostáváme k&nbsp;velmi důležitému rysu typového systému
+programovacího jazyka F#. Můžeme totiž vytvořit nový datový typ umožňující
+reprezentaci hodnoty, která sama o sobě může být různého typu. Typickým
+příkladem je typ nazvaný <strong>Shape</strong>, který je disjunktním
+sjednocením jednotlivých konkrétních typů (tvarů), například obdélníku a
+kružnice:</p>
+
+<pre>
+type <strong>Shape</strong> = Rectangle of int * int | Circle of int
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: povšimněte si, že
+<strong>Rectangle</strong> je n-tice zatímco <strong>Circle</strong> je datový
+typ <strong>int</strong>.</div></p>
+
+<p>Deklarace proměnných typu <strong>Shape</strong>:</p>
+
+<pre>
+let r1 = Rectangle (10, 20)
+let c = Circle 100
+</pre>
+
+<p>Přidejme si ještě funkci, která bude hodnoty typu <strong>Shape</strong>
+tisknout. Pro rozlišení konkrétního typu hodnoty použijeme pattern matching a
+(opět) si povšimněte, že zápis na levé straně šipky syntakticky přesně odpovídá
+deklaraci hodnoty uvedené výše:</p>
+
+<pre>
+type <strong>Shape</strong> = Rectangle of int * int | Circle of int
+&nbsp;
+let <strong>print_shape</strong> (s : Shape) =
+    match s with
+    | Circle r -&gt; printf "circle: %d\n" r
+    | Rectangle (width, height) -&gt; printf "rect: %dx%d\n" width height
+&nbsp;
+let r1 = Rectangle (10, 20)
+let c = Circle 100
+&nbsp;
+print_shape r1
+print_shape c
+</pre>
+
+<p>Navíc v&nbsp;tomto případě můžeme typ parametru funkce
+<strong>print_shape</strong> vynechat; tuto práci za nás udělá algoritmus pro
+odvození typů (typovou inferenci):</p>
+
+<pre>
+let <strong>print_shape</strong> s =
+    match s with
+    | Circle r -&gt; printf "circle: %d\n" r
+    | Rectangle (width, height) -&gt; printf "rect: %dx%d\n" width height
+</pre>
+
+<p>V&nbsp;praxi se namísto zápisu:</p>
+
+<pre>
+type <strong>Shape</strong> = Rectangle of int * int | Circle of int
+</pre>
+
+<p>mnohdy setkáme s&nbsp;rozdělením na více řádky:</p>
+
+<pre>
+type <strong>Shape</strong> = 
+    | Circle of int
+    | Rectangle of int * int
+&nbsp;
+let <strong>print_shape</strong> (s : Shape) =
+    match s with
+    | Circle r -&gt; printf "circle: %d\n" r
+    | Rectangle (width, height) -&gt; printf "rect: %dx%d\n" width height
+&nbsp;
+let r1 = Rectangle (10, 20)
+let c = Circle 100
+&nbsp;
+print_shape r1
+print_shape c
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: naposledy &ndash; definice typu
+<strong>Shape</strong> nyní vizuálně do jisté míry odpovídá zápisu bloku
+<strong>match</strong> nad tímtéž typem. Jedná se o další elegantní rys
+programovacího jazyka F#.</div></p>
 
 
 
 <p><a name="k11"></a></p>
-<h2 id="k11">11. </h2>
+<h2 id="k11">11. Rekurzivní a generické datové typy</h2>
+
+<p>Disjunktní sjednocení zkombinované s&nbsp;n-ticemi ve skutečnosti
+představuje velmi silný rys programovacího jazyka F#. Ten je navíc umocněn tím,
+že je možné definovat i rekurzivní datový typ, kdy jedna z&nbsp;položek
+sjednocení je typem obsahujícím samotné sjednocení. Zní to jako zcela
+akademický problém? Podívejme se na příklad definice datového typu, který
+reprezentuje výrazy (ne tak, jak jsou zapsány v&nbsp;kódu, ale jejich
+inherentní rekurzivní podobu). Nový datový typ se jmenuje
+<strong>expression</strong> a jedná se o disjunktní sjednocení pěti možností
+&ndash; čtyř podvýrazů a názvu proměnných:</p>
+
+<pre>
+type <strong>expression</strong> =
+    | Plus of expression * expression        <i>(* a + b *)</i>
+    | Minus of expression * expression       <i>(* a - b *)</i>
+    | Times of expression * expression       <i>(* a * b *)</i>
+    | Divide of expression * expression      <i>(* a / b *)</i>
+    | Var of string    
+&nbsp;
+let x = Times (Var "n", Plus (Var "x", Var "y"))
+&nbsp;
+printf "%A\n" x
+</pre>
+
+<p>Ovšem možnosti datového systému jazyka F# jdou ještě dále, protože můžeme
+vytvořit generický datový typ. Tentokrát se bude jednat o datový typ
+představující strom, což je rekurzivní struktura. Povšimněte si, že existují
+dva typy prvků (uzlů). Prázdný (koncový uzel) nebo uzel představovaný n-ticí
+obsahující levý podstrom, hodnotu uloženou v&nbsp;uzlu a pravý podstrom
+(samozřejmě, že podstromy mohou být prázdné, takže se může jednat o list
+stromu):</p>
+
+<pre>
+type Tree&lt;'a&gt; =
+    | E
+    | T of Tree&lt;'a&gt; * 'a * Tree&lt;'a&gt;
+&nbsp;
+let t1 = T(E, "foo", E)
+let t2 = T(T(E, "foo", E), "bar", T(E, "baz", E))
+&nbsp;
+printf "%A\n" t1
+&nbsp;
+printf "%A\n" t2
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: můžete si sami vyzkoušet jinou
+reprezentaci stromu, například takovou, aby hodnoty byly uložené jen
+v&nbsp;listech stromu (potom lze namísto prázdného uzlu použít přímo generickou
+hodnotu, ostatní uzly budou obsahovat pouze podstromy).</div></p>
 
 
 
 <p><a name="k12"></a></p>
-<h2 id="k12">12. </h2>
+<h2 id="k12">12. Datový typ třída (<i>class</i>)</h2>
+
+<p>Jazyk F# je odvozen z&nbsp;jazyka OCaml, kde &bdquo;O&ldquo; znamená
+&bdquo;objective&ldquo;. Navíc musí F# spolupracovat s&nbsp;dalšími jazyky
+v&nbsp;ekosystému .NET. Z&nbsp;obou vlastností vyplývá, že F# vlastně musí
+podporovat objektově orientované programování, konkrétně OOP založené na
+třídách (i když samotný F# je spíše funkcionálním jazykem). Podívejme se nyní
+na deklaraci jednoduché třídy, jejíž instance budou mít dva atributy
+<strong>X</strong> a <strong>Y</strong> (rozměry v&nbsp;jednotlivých osách) a
+s&nbsp;konstruktorem, který akceptuje dva parametry typu <strong>int</strong>
+(výchozí hodnoty rozměrů):</p>
+
+<pre>
+type <strong>Rectangle</strong>(x: int, y: int) =
+    member this.X = x
+    member this.Y = y
+&nbsp;
+&nbsp;
+<i>(* konstrukce objektu typu Rectangle *)</i>
+let r1 = Rectangle(10, 20)
+&nbsp;
+printf "%A\n" r1
+</pre>
+
+<p>Do deklarace třídy můžeme přidat i metody. Například se může jednat o metodu
+nazvanou <strong>Print</strong>, která vytiskne jak název objektu, tak i jeho
+atributy:</p>
+
+<pre>
+type <strong>Rectangle</strong>(x: int, y: int) =
+    member this.X = x
+    member this.Y = y
+    member this.<strong>Print</strong>() =
+        printf "Rectangle: %dx%d\n" this.X this.Y
+&nbsp;
+let r1 = Rectangle(10, 20)
+&nbsp;
+r1.Print()
+</pre>
+
+<p>Zajímavé ovšem je, že v&nbsp;metodě <strong>Print</strong> můžeme použít i
+hodnotu původních parametrů konstruktoru (což je v&nbsp;případě neměnných
+hodnot to stejné, jakoby se jednalo přímo o atributy objektu). Mnohdy se tedy
+můžeme setkat se třídami, jejichž instance sice nesou informaci o svém stavu,
+ale nemají deklarovány atributy:</p>
+
+<pre>
+type <strong>Rectangle</strong>(x: int, y: int) =
+    member this.X = x
+    member this.Y = y
+    member this.Print() =
+        printf "Rectangle: %dx%d\n" <strong>x</strong> <strong>y</strong>
+&nbsp;
+let r1 = Rectangle(10, 20)
+&nbsp;
+r1.Print()
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: vytvořte si více instancí třídy
+<strong>Rectangle</strong> pro ověření, zda je vše funkční.</div></p>
 
 
 
 <p><a name="k13"></a></p>
-<h2 id="k13">13. </h2>
+<h2 id="k13">13. Lokální symbol v&nbsp;deklaraci třídy</h2>
+
+<p>Již <a href="#k12">v&nbsp;předchozí kapitole</a> jsme mohli vidět použití
+parametrů předaných konstruktoru uvnitř třídy. Programovací jazyk F# dokonce
+umožňuje deklaraci lokálního symbolu při konstrukci třídy; tedy hodnota
+navázaná na symbol bude dostupná ve vytvořeném objektu. Například si můžeme
+spočítat plochu obdélníka a uložit si ji do lokálního symbolu
+<strong>area</strong>. Hodnota je posléze použita v&nbsp;metodě
+<strong>Print</strong>:</p>
+
+<pre>
+type Rectangle(x: int, y: int) =
+    let <strong>area</strong> = x * y
+    member this.X = x
+    member this.Y = y
+    member this.Print() =
+        printf "Rectangle: %dx%d with area %d\n" x y <strong>area</strong>
+&nbsp;
+let r1 = Rectangle(10, 20)
+&nbsp;
+r1.Print()
+</pre>
+
+<p>Samozřejmě si opět můžeme metodu <strong>Print</strong> upravit tak, aby
+četla hodnoty atributů:</p>
+
+<pre>
+type Rectangle(x: int, y: int) =
+    let <strong>area</strong> = x * y
+    member this.X = x
+    member this.Y = y
+    member this.Print() =
+        printf "Rectangle: %dx%d with area %d\n" this.X this.Y <strong>area</strong>
+&nbsp;
+let r1 = Rectangle(10, 20)
+&nbsp;
+r1.Print()
+</pre>
+
+<p>Lokální symbol nelze, na rozdíl od atributů, číst vně definice třídy. To
+znamená, že následující program nebude přeložitelný kvůli podtrženým
+řádkům:</p>
+
+<pre>
+type <strong>Rectangle</strong>(x: int, y: int) =
+    let area = x * y
+    member this.X = x
+    member this.Y = y
+    member this.Print() =
+        printf "Rectangle: %dx%d %d\n" x y area
+&nbsp;
+let r1 = Rectangle(10, 20)
+let r2 = Rectangle(1, 2)
+&nbsp;
+printf "%d\n" r1.X
+printf "%d\n" r1.Y
+<u>printf "%d\n" r1.area</u>
+&nbsp;
+printf "%d\n" r2.X
+printf "%d\n" r2.Y
+<u>printf "%d\n" r2.area</u>
+</pre>
 
 
 
 <p><a name="k14"></a></p>
-<h2 id="k14">14. </h2>
+<h2 id="k14">14. Konstrukce nové instance třídy realizovaná v&nbsp;metodě</h2>
+
+<p>Atributy objektů jsou, pokud ovšem nebudeme explicitně žádat o jiné chování,
+neměnitelné (<i>immutable</i>), což je v&nbsp;mnoha ohledech výhoda. Relativně
+často se ovšem setkáme s&nbsp;tím, že nějaká metoda má změnit stav objektu,
+tj.&nbsp;vlastně hodnoty jeho atributů. To lze samozřejmě zařídit tak, že se
+příslušné atributy deklarují takovým způsobem, aby byly měnitelné. Ovšem mnohdy
+je výhodnější použít odlišný přístup &ndash; taková metoda bude vracet nový
+objekt, ovšem již se změněným stavem. Příkladem může být požadavek na změnu
+velikosti obdélníka, tedy získání obdélníka, jehož rozměry na x-ové a y-ové ose
+budou zvětšeny nebo zmenšeny o nějaké hodnoty <strong>dx</strong> a
+<strong>dy</strong>. Pro tento účel lze deklarovat metodu
+<strong>Enlarge</strong>, která vrací novou instanci <strong>Rectangle</strong>
+(ale stávající instanci nijak nemění):</p>
+
+<pre>
+type <strong>Rectangle</strong>(x: int, y: int) =
+    member this.X = x
+    member this.Y = y
+    member this.Print() =
+        printf "Rectangle: %dx%d\n" this.X this.Y
+    member this.Enlarge(dx, dy) =
+        Rectangle(this.X + dx, this.Y + dy)
+</pre>
+
+<p>Chování takto deklarované třídy si můžeme snadno ověřit například na tomto
+kódu:</p>
+
+<pre>
+let r1 = Rectangle(10, 20)
+r1.Print()
+&nbsp;
+let r2 = r1.Enlarge(1, 2)
+&nbsp;
+r1.Print()
+r2.Print()
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: obdélník <strong>r1</strong> je vytištěn
+dvakrát, aby bylo patrné, jak ho zavolání metody <strong>Enlarge</strong>
+změnilo či naopak nezměnilo.</div></p>
 
 
 
 <p><a name="k15"></a></p>
-<h2 id="k15">15. </h2>
+<h2 id="k15">15. Operátory definované v&nbsp;rámci uživatelského datového typu</h2>
+
+<p><a
+href="https://www.root.cz/clanky/operatory-v-programovacim-jazyku-f/">V&nbsp;předchozím
+článku</a> jsme se seznámili s&nbsp;tím, jakým způsobem je v&nbsp;programovacím
+jazyku F# umožněno definovat nové operátory popř.&nbsp;změnit chování
+existujících operátorů. Ovšem prozatím jsme se věnovali jen operátorům na
+globální úrovni (resp.&nbsp;na úrovni jednotlivých modulů, o tom však až
+příště). V&nbsp;praxi je však mnohem užitečnější definice operátoru
+v&nbsp;rámci určité třídy. Například si můžeme nadefinovat třídu reprezentující
+dvousložkový vektor:</p>
+
+<pre>
+type <strong>Vector</strong>(x: int, y: int) =
+    member this.X = x
+    member this.Y = y
+</pre>
+
+<p>Pro tuto třídu, resp.&nbsp;přesněji řečeno pro instance této třídy, lze
+přetížit standardní operátor + tak, aby skutečně prováděl součet dvou vektorů a
+vracel vektor nový:</p>
+
+<pre>
+static member (+) (a : Vector, b : Vector) =
+    Vector(a.X + b.X, a.Y + b.Y)
+</pre>
+
+<p>Takto vypadá třída <strong>Vector</strong> s&nbsp;definicí přetíženého
+operátoru:</p>
+
+<pre>
+type <strong>Vector</strong>(x: int, y: int) =
+    member this.X = x
+    member this.Y = y
+    member this.Print() =
+        printf "Vector: %dx%d\n" this.X this.Y
+    static member (+) (a : Vector, b : Vector) =
+        Vector(a.X + b.X, a.Y + b.Y)
+&nbsp;
+let v1 = Vector(10, 20)
+v1.Print()
+&nbsp;
+let v2 = Vector(1, 2)
+v2.Print()
+&nbsp;
+let v3 = v1 + v2
+v3.Print()
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: pochopitelně zůstaly původní vlastnosti
+operátoru + zachovány pro ty datové typy, pro které byl operátor navržen (celá
+čísla, řetězce atd.).</div></p>
+
+<p>Typicky u přetížených operátorů, ale i u dalších malých metod, může být
+výhodné použít modifikátor <strong>inline</strong>, který může vést
+k&nbsp;vygenerování rychlejšího strojového kódu. Úprava předchozího
+demonstračního příkladu je v&nbsp;tomto případě snadná:</p>
+
+<pre>
+type <strong>Vector</strong>(x: int, y: int) =
+    member this.X = x
+    member this.Y = y
+    member this.Print() =
+        printf "Vector: %dx%d\n" this.X this.Y
+    static member <u>inline</u> (+) (a : Vector, b : Vector) =
+        Vector(a.X + b.X, a.Y + b.Y)
+&nbsp;
+let v1 = Vector(10, 20)
+v1.Print()
+&nbsp;
+let v2 = Vector(1, 2)
+v2.Print()
+&nbsp;
+let v3 = v1 + v2
+v3.Print()
+</pre>
 
 
 
 <p><a name="k16"></a></p>
-<h2 id="k16">16. </h2>
+<h2 id="k16">16. Dědičnost</h2>
+
+<p>Posledním tématem, kterému se dnes budeme alespoň ve stručnosti věnovat, je
+realizace dědičnosti v&nbsp;programovacím jazyku F#. Ukažme si její využití na
+jednoduchém příkladu, v&nbsp;němž je definována nadtřída nazvaná
+<strong>Shape</strong>, ze které je odvozena třída <strong>Rectangle</strong>
+(povšimněte si řádku začínajícího klíčovým slovem
+<strong>inherit</strong>):</p>
+
+<pre>
+type <strong>Shape</strong>() =
+    member this.Print() = ()
+&nbsp;
+type <strong>Rectangle</strong>(x: int, y: int) =
+    <u>inherit Shape()</u>
+    member this.X = x
+    member this.Y = y
+    member this.Print() =
+        printf "Rectangle: %dx%d\n" this.X this.Y
+    member this.Enlarge(dx, dy) =
+        Rectangle(this.X + dx, this.Y + dy)
+&nbsp;
+let r1 = Rectangle(10, 20)
+r1.Print()
+&nbsp;
+let r2 = r1.Enlarge(1, 2)
+r2.Print()
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: třída <strong>Shape</strong> není
+definována jako abstraktní, takže lze vytvořit její instanci. A pokud si to
+chcete ověřit, je lepší změnit její metodu <strong>Print</strong>:</div></p>
+
+<p><div class="rs-tip-major">Poznámka<sup>2</sup>: případné volání konstruktoru
+nadtřídy se provádí právě na řádku <strong>inherit</strong>.</div></p>
+
+<pre>
+type <strong>Shape</strong>() =
+    member this.Print() = printf "Shapeless shape"
+</pre>
+
+<p>Samozřejmě je možné z&nbsp;jedné nadtřídy odvodit více podtříd, takže se
+vytváří klasická hierarchie tříd:</p>
+
+<pre>
+type <strong>Shape</strong>() =
+    member this.Print() = ()
+&nbsp;
+type <strong>Circle</strong>(r: int) =
+    inherit Shape()
+    member this.R = r
+    member this.Print() =
+        printf "Circle: %d\n" this.R
+    member this.Enlarge(dr) =
+        Circle(this.R + dr)
+&nbsp;
+type <strong>Rectangle</strong>(x: int, y: int) =
+    inherit Shape()
+    member this.X = x
+    member this.Y = y
+    member this.Print() =
+        printf "Rectangle: %dx%d\n" this.X this.Y
+    member this.Enlarge(dx, dy) =
+        Rectangle(this.X + dx, this.Y + dy)
+&nbsp;
+let r1 = Rectangle(10, 20)
+r1.Print()
+&nbsp;
+let r2 = r1.Enlarge(1, 2)
+r2.Print()
+&nbsp;
+let c1 = Circle(10)
+c1.Print()
+&nbsp;
+let c2 = c1.Enlarge(1)
+c2.Print()
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: pokud pracujete s&nbsp;programovacím
+jazykem založeným na třídním OOP, asi vás napadlo, jaké nedostatky předchozí
+kód obsahuje. Postupně je budeme &bdquo;vychytávat&ldquo;.</div></p>
 
 
 
 <p><a name="k17"></a></p>
-<h2 id="k17">17. </h2>
+<h2 id="k17">17. Operátor <strong>upcast</strong>: přetypování na předka</h2>
+
+<p>V&nbsp;programovacím jazyku F# nalezneme mj.&nbsp;i dva
+&bdquo;šipkové&ldquo; operátory, které jsme <a
+href="https://www.root.cz/clanky/operatory-v-programovacim-jazyku-f/#k10">minule</a>
+vynechali. Jeden z&nbsp;těchto operátorů se zapisuje znakem :&gt; a provádí
+konverzi hodnoty na třídu, která se v&nbsp;hierarchii nachází výše.
+Z&nbsp;tohoto důvodu se tento operátor nazývá <i>upcast</i>.</p>
+
+<p>Podívejme se nyní na základní způsob použití tohoto operátoru. Použijeme
+naši hierarchii tříd <strong>Shape:Circle</strong> a
+<strong>Shape:Rectangle</strong>:</p>
+
+<pre>
+type <strong>Shape</strong>() =
+    member this.Print() = printf "Shapeless shape"
+&nbsp;
+type <strong>Circle</strong>(r: int) =
+    inherit Shape()
+    member this.R = r
+    member this.Print() =
+        printf "Circle: %d\n" this.R
+    member this.Enlarge(dr) =
+        Circle(this.R + dr)
+&nbsp;
+type <strong>Rectangle</strong>(x: int, y: int) =
+    inherit Shape()
+    member this.X = x
+    member this.Y = y
+    member this.Print() =
+        printf "Rectangle: %dx%d\n" this.X this.Y
+    member this.Enlarge(dx, dy) =
+        Rectangle(this.X + dx, this.Y + dy)
+</pre>
+
+<p>Necháme si zkonstruovat několik instancí tříd <strong>Rectangle</strong> a
+<strong>Circle</strong>:</p>
+
+<pre>
+let r1 = Rectangle(10, 20)
+r1.Print()
+&nbsp;
+let r2 = r1.Enlarge(1, 2)
+r2.Print()
+&nbsp;
+let c1 = Circle(10)
+c1.Print()
+&nbsp;
+let c2 = c1.Enlarge(1)
+c2.Print()
+</pre>
+
+<p>Další objekt bude získán z&nbsp;instance <strong>r1</strong>, ale bude
+přetypován na instanci třídy <strong>Shape</strong>:</p>
+
+<pre>
+let s1 = r1 :&gt; Shape
+s1.Print()
+</pre>
+
+<p>Výsledky ukazují, jak bude vše probíhat v&nbsp;runtime:</p>
+
+<pre>
+Rectangle: 10x20
+Rectangle: 11x22
+Circle: 10
+Circle: 11
+Shapeless shape
+</pre>
+
+<p>Existuje i operátor <i>downcast</i> zapisovaný znaky :?&gt;. Jeho chování je
+v&nbsp;praxi poněkud složitější a proto se k&nbsp;němu ještě vrátíme
+v&nbsp;dalším článku:</p>
+
+<pre>
+let s2 = s1 :?&gt; Rectangle
+s2.Print()
+&nbsp;
+let s3 = s1 :?&gt; Circle
+s3.Print()
+</pre>
+
+<p>Tato část kódu po svém překladu a spuštění vypíše:</p>
+
+<pre>
+Rectangle: 10x20
+Circle: undefined
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: jak sami vidíte, problematická je
+zejména druhá konverze. Konkrétně jsme z&nbsp;instance třídy
+<strong>Rectangle</strong> udělali instanci třídy <strong>Shape</strong> a
+posléze instanci třídy <strong>Circle</strong>, což pochopitelně bez dalších
+podpůrných částí kódu nemůže pracovat korektně.</div></p>
 
 
 
@@ -226,40 +1130,40 @@ příklady:</p>
 <tr><td>58</td><td>article_03/pattern5.fs</td><td>rekurzivní implementace Ackermannovy funkce</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/pattern5.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/pattern5.fs</a></td></tr>
 <tr><td>59</td><td>article_03/pattern6.fs</td><td>kontrola neplatných vstupních hodnot pro Ackermannovu funkci</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/pattern6.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/pattern6.fs</a></td></tr>
 <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-<tr><td>60</td><td>article_03/fibonacci1.fs</td><td>výpočet Fibonacciho posloupnosti založený na pattern matchingu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/fibonacci1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/fibonacci1.fs</a></td></tr>
-<tr><td>61</td><td>article_03/fibonacci2.fs</td><td>výpočet Fibonacciho posloupnosti založený na pattern matchingu (více idiomatický zápis)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/fibonacci2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/fibonacci2.fs</a></td></tr>
+<tr><td> 60</td><td>article_03/fibonacci1.fs</td><td>výpočet Fibonacciho posloupnosti založený na pattern matchingu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/fibonacci1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/fibonacci1.fs</a></td></tr>
+<tr><td> 61</td><td>article_03/fibonacci2.fs</td><td>výpočet Fibonacciho posloupnosti založený na pattern matchingu (více idiomatický zápis)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/fibonacci2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/fibonacci2.fs</a></td></tr>
 <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-<tr><td>62</td><td>article_03/first.fs</td><td>funkce vracející první prvek z&nbsp;dvojice založená na pattern matchingu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/first.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/first.fs</a></td></tr>
-<tr><td>63</td><td>article_03/second.fs</td><td>funkce vracející druhý prvek z&nbsp;dvojice založená na pattern matchingu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/second.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/second.fs</a></td></tr>
-<tr><td>64</td><td>article_03/zero_coordinate.fs</td><td>test na nulovou souřadnici/souřadnice založený na pattern matchingu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/zero_coordinate.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/zero_coordinate.fs</a></td></tr>
+<tr><td> 62</td><td>article_03/first.fs</td><td>funkce vracející první prvek z&nbsp;dvojice založená na pattern matchingu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/first.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/first.fs</a></td></tr>
+<tr><td> 63</td><td>article_03/second.fs</td><td>funkce vracející druhý prvek z&nbsp;dvojice založená na pattern matchingu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/second.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/second.fs</a></td></tr>
+<tr><td> 64</td><td>article_03/zero_coordinate.fs</td><td>test na nulovou souřadnici/souřadnice založený na pattern matchingu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/zero_coordinate.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/zero_coordinate.fs</a></td></tr>
 <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-<tr><td>65</td><td>article_03/get_model.fs</td><td>získání prvku ze záznamu (opět založeno na pattern matchingu)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/get_model.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/get_model.fs</a></td></tr>
+<tr><td> 65</td><td>article_03/get_model.fs</td><td>získání prvku ze záznamu (opět založeno na pattern matchingu)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_03/get_model.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_03/get_model.fs</a></td></tr>
 <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-<tr><td>66</td><td>article_04/list_literal_1.fs</td><td>seznam se třemi prvky typu celé číslo</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_1.fs</a></td></tr>
-<tr><td>67</td><td>article_04/list_literal_2.fs</td><td>seznam se třemi prvky typu řetězec</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_2.fs</a></td></tr>
-<tr><td>68</td><td>article_04/list_literal_3.fs</td><td>seznam se třemi prvky typu n-tice</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_3.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_3.fs</a></td></tr>
-<tr><td>69</td><td>article_04/list_literal_4.fs</td><td>nekorektní pokus o vytvoření seznamu s&nbsp;prvky různých typů</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_4.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_4.fs</a></td></tr>
-<tr><td>70</td><td>article_04/empty_list.fs</td><td>konstrukce prázdného seznamu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/empty_list.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/empty_list.fs</a></td></tr>
+<tr><td> 66</td><td>article_04/list_literal_1.fs</td><td>seznam se třemi prvky typu celé číslo</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_1.fs</a></td></tr>
+<tr><td> 67</td><td>article_04/list_literal_2.fs</td><td>seznam se třemi prvky typu řetězec</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_2.fs</a></td></tr>
+<tr><td> 68</td><td>article_04/list_literal_3.fs</td><td>seznam se třemi prvky typu n-tice</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_3.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_3.fs</a></td></tr>
+<tr><td> 69</td><td>article_04/list_literal_4.fs</td><td>nekorektní pokus o vytvoření seznamu s&nbsp;prvky různých typů</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_4.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_literal_4.fs</a></td></tr>
+<tr><td> 70</td><td>article_04/empty_list.fs</td><td>konstrukce prázdného seznamu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/empty_list.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/empty_list.fs</a></td></tr>
 <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-<tr><td>71</td><td>article_04/head_tail_1.fs</td><td>složení seznamu se dvěma prvky s&nbsp;využitím operátoru <strong>::</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/head_tail_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/head_tail_1.fs</a></td></tr>
-<tr><td>72</td><td>article_04/head_tail_2.fs</td><td>složení seznamu se třemi prvky s&nbsp;využitím operátoru <strong>::</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/head_tail_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/head_tail_2.fs</a></td></tr>
+<tr><td> 71</td><td>article_04/head_tail_1.fs</td><td>složení seznamu se dvěma prvky s&nbsp;využitím operátoru <strong>::</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/head_tail_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/head_tail_1.fs</a></td></tr>
+<tr><td> 72</td><td>article_04/head_tail_2.fs</td><td>složení seznamu se třemi prvky s&nbsp;využitím operátoru <strong>::</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/head_tail_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/head_tail_2.fs</a></td></tr>
 <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-<tr><td>73</td><td>article_04/list_properties.fs</td><td>vlastnosti (<i>properties</i>) seznamů</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_properties.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_properties.fs</a></td></tr>
-<tr><td>74</td><td>article_04/len_1.fs</td><td>naivní rekurzivní výpočet délky seznamu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/len_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/len_1.fs</a></td></tr>
-<tr><td>75</td><td>article_04/len_2.fs</td><td>vylepšený rekurzivní výpočet délky seznamu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/len_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/len_2.fs</a></td></tr>
-<tr><td>76</td><td>article_04/len_3.fs</td><td>vylepšený rekurzivní výpočet délky seznamu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/len_3.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/len_3.fs</a></td></tr>
+<tr><td> 73</td><td>article_04/list_properties.fs</td><td>vlastnosti (<i>properties</i>) seznamů</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_properties.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/list_properties.fs</a></td></tr>
+<tr><td> 74</td><td>article_04/len_1.fs</td><td>naivní rekurzivní výpočet délky seznamu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/len_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/len_1.fs</a></td></tr>
+<tr><td> 75</td><td>article_04/len_2.fs</td><td>vylepšený rekurzivní výpočet délky seznamu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/len_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/len_2.fs</a></td></tr>
+<tr><td> 76</td><td>article_04/len_3.fs</td><td>vylepšený rekurzivní výpočet délky seznamu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/len_3.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/len_3.fs</a></td></tr>
 <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-<tr><td>77</td><td>article_04/range_1.fs</td><td>vytvoření sekvence numerických hodnot s&nbsp;využitím operátoru <strong>range</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_1.fs</a></td></tr>
-<tr><td>78</td><td>article_04/range_2.fs</td><td>vytvoření sekvence numerických hodnot s&nbsp;využitím operátoru <strong>range</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_2.fs</a></td></tr>
-<tr><td>79</td><td>article_04/range_3.fs</td><td>vytvoření sekvence numerických hodnot s&nbsp;využitím operátoru <strong>range</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_3.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_3.fs</a></td></tr>
-<tr><td>80</td><td>article_04/range_4.fs</td><td>vytvoření sekvence numerických hodnot s&nbsp;využitím operátoru <strong>range</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_4.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_4.fs</a></td></tr>
+<tr><td> 77</td><td>article_04/range_1.fs</td><td>vytvoření sekvence numerických hodnot s&nbsp;využitím operátoru <strong>range</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_1.fs</a></td></tr>
+<tr><td> 78</td><td>article_04/range_2.fs</td><td>vytvoření sekvence numerických hodnot s&nbsp;využitím operátoru <strong>range</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_2.fs</a></td></tr>
+<tr><td> 79</td><td>article_04/range_3.fs</td><td>vytvoření sekvence numerických hodnot s&nbsp;využitím operátoru <strong>range</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_3.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_3.fs</a></td></tr>
+<tr><td> 80</td><td>article_04/range_4.fs</td><td>vytvoření sekvence numerických hodnot s&nbsp;využitím operátoru <strong>range</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_4.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/range_4.fs</a></td></tr>
 <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-<tr><td>81</td><td>article_04/join_lists.fs</td><td>spojení dvou seznamů operátorem <strong>::</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/join_lists.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/join_lists.fs</a></td></tr>
-<tr><td>82</td><td>article_04/append_1.fs</td><td>implementace spojení dvou seznamů rekurzivním výpočtem</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/append_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/append_1.fs</a></td></tr>
-<tr><td>83</td><td>article_04/append_2.fs</td><td>implementace spojení dvou seznamů rekurzivním výpočtem, použití pattern matchingu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/append_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/append_2.fs</a></td></tr>
+<tr><td> 81</td><td>article_04/join_lists.fs</td><td>spojení dvou seznamů operátorem <strong>::</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/join_lists.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/join_lists.fs</a></td></tr>
+<tr><td> 82</td><td>article_04/append_1.fs</td><td>implementace spojení dvou seznamů rekurzivním výpočtem</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/append_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/append_1.fs</a></td></tr>
+<tr><td> 83</td><td>article_04/append_2.fs</td><td>implementace spojení dvou seznamů rekurzivním výpočtem, použití pattern matchingu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/append_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/append_2.fs</a></td></tr>
 <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-<tr><td>84</td><td>article_04/sum_1.fs</td><td>součet hodnot všech prvků v&nbsp;seznamu (bez tail rekurze)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/sum_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/sum_1.fs</a></td></tr>
-<tr><td>85</td><td>article_04/sum_2.fs</td><td>součet hodnot všech prvků v&nbsp;seznamu (s&nbsp;využitím tail rekurze)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/sum_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/sum_2.fs</a></td></tr>
+<tr><td> 84</td><td>article_04/sum_1.fs</td><td>součet hodnot všech prvků v&nbsp;seznamu (bez tail rekurze)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/sum_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/sum_1.fs</a></td></tr>
+<tr><td> 85</td><td>article_04/sum_2.fs</td><td>součet hodnot všech prvků v&nbsp;seznamu (s&nbsp;využitím tail rekurze)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_04/sum_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_04/sum_2.fs</a></td></tr>
 <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
 <tr><td> 86</td><td>article_05/option_type.fs</td><td>definice datového typu <strong>Option</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_05/option_type.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_05/option_type.fs</a></td></tr>
 <tr><td> 87</td><td>article_05/none_value.fs</td><td>hodnota <strong>None</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_05/none_value.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_05/none_value.fs</a></td></tr>
@@ -288,9 +1192,65 @@ příklady:</p>
 <tr><td>108</td><td>article_05/array_mutation.fs</td><td>mutace pole: modifikace hodnot jeho prvků</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_05/array_mutation.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_05/array_mutation.fs</a></td></tr>
 <tr><td>109</td><td>article_05/array_zerocreate.fs</td><td>konstrukce pole s&nbsp;nulovými prvky</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_05/array_zerocreate.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_05/array_zerocreate.fs</a></td></tr>
 <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-<tr><td>110</td><td>article_06/</td><td></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/</a></td></tr>
-<tr><td>111</td><td>article_06/</td><td></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/</a></td></tr>
-<tr><td>112</td><td>article_06/</td><td></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/</a></td></tr>
+<tr><td>110</td><td>article_06/unary_ops1.fs</td><td>unární aritmetické operátory a datový typ <strong>int</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/unary_ops1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/unary_ops1.fs</a></td></tr>
+<tr><td>111</td><td>article_06/unary_ops2.fs</td><td>unární aritmetické operátory a datový typ <strong>float</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/unary_ops2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/unary_ops2.fs</a></td></tr>
+<tr><td>112</td><td>article_06/binary_ops.fs</td><td>binární aritmetické operátory a datový typ <strong>int</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/binary_ops.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/binary_ops.fs</a></td></tr>
+<tr><td>113</td><td>article_06/boolean.fs</td><td>Booleovské unární i binární operátory</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/boolean.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/boolean.fs</a></td></tr>
+<tr><td>114</td><td>article_06/relational_1.fs</td><td>relační operátory, porovnání hodnot typu <strong>int</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/relational_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/relational_1.fs</a></td></tr>
+<tr><td>115</td><td>article_06/relational_2.fs</td><td>relační operátory, porovnání hodnot typu <strong>string</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/relational_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/relational_2.fs</a></td></tr>
+<tr><td>116</td><td>article_06/relational_3.fs</td><td>relační operátory, porovnání hodnot typu <strong>array</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/relational_3.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/relational_3.fs</a></td></tr>
+<tr><td>117</td><td>article_06/relational_4.fs</td><td>relační operátory, porovnání hodnot typu <strong>array</strong></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/relational_4.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/relational_4.fs</a></td></tr>
+<tr><td>118</td><td>article_06/bit_operators.fs</td><td>operátory provádějící operaci bit po bitu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/bit_operators.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/bit_operators.fs</a></td></tr>
+<tr><td>119</td><td>article_06/shifts.fs</td><td>operátory pro bitové a aritmetické posuny</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/shifts.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/shifts.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>120</td><td>article_06/func_pipeline_1.fs</td><td>kolona funkcí vytvořená operátorem |&gt;</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/func_pipeline_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/func_pipeline_1.fs</a></td></tr>
+<tr><td>121</td><td>article_06/func_pipeline_2.fs</td><td>kolona funkcí vytvořená operátorem &lt;|</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/func_pipeline_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/func_pipeline_2.fs</a></td></tr>
+<tr><td>122</td><td>article_06/func_pipeline_3.fs</td><td>kolona funkcí vytvořená operátorem ||&gt;</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/func_pipeline_3.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/func_pipeline_3.fs</a></td></tr>
+<tr><td>123</td><td>article_06/func_pipeline_4.fs</td><td>kolona funkcí vytvořená operátorem ||&gt;</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/func_pipeline_4.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/func_pipeline_4.fs</a></td></tr>
+<tr><td>124</td><td>article_06/func_pipeline_5.fs</td><td>kolona funkcí vytvořená operátorem |||&gt;</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/func_pipeline_5.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/func_pipeline_5.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>125</td><td>article_06/func_composition_1.fs</td><td>kompozice dvou funkcí operátorem &gt;&gt;</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/func_composition_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/func_composition_1.fs</a></td></tr>
+<tr><td>126</td><td>article_06/func_composition_2.fs</td><td>kompozice dvou funkcí operátorem &lt;&lt;</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/func_composition_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/func_composition_2.fs</a></td></tr>
+<tr><td>127</td><td>article_06/func_composition_3.fs</td><td>kompozice tří funkcí operátorem &gt;&gt;</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/func_composition_3.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/func_composition_3.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>128</td><td>article_06/new_operator_1.fs</td><td>definice nového binárního operátoru</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/new_operator_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/new_operator_1.fs</a></td></tr>
+<tr><td>129</td><td>article_06/new_operator_2.fs</td><td>přepis stávajícího binárního operátoru</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/new_operator_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/new_operator_2.fs</a></td></tr>
+<tr><td>130</td><td>article_06/new_operator_3.fs</td><td>rozlišení unárního a binárního operátoru</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/new_operator_3.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/new_operator_3.fs</a></td></tr>
+<tr><td>131</td><td>article_06/new_operator_4.fs</td><td>rozlišení unárního a binárního operátoru</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/new_operator_4.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/new_operator_4.fs</a></td></tr>
+<tr><td>132</td><td>article_06/new_operator_5.fs</td><td>otestování asociativity operátoru</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_06/new_operator_5.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_06/new_operator_5.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>133</td><td>article_07/circle_rectangle_1.fs</td><td>datový typ přestavující buď kružnici nebo obdélník</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/circle_rectangle_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/circle_rectangle_1.fs</a></td></tr>
+<tr><td>134</td><td>article_07/circle_rectangle_2.fs</td><td>datový typ přestavující buď kružnici nebo obdélník</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/circle_rectangle_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/circle_rectangle_2.fs</a></td></tr>
+<tr><td>135</td><td>article_07/discriminated_union.fs</td><td>použití datového typu <i>discriminated union</i></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/discriminated_union.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/discriminated_union.fs</a></td></tr>
+<tr><td>136</td><td>article_07/enum_1.fs</td><td>příklad použití datového typu <i>výčet</i></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/enum.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/enum.fs</a></td></tr>
+<tr><td>137</td><td>article_07/enum_2.fs</td><td>příklad použití datového typu <i>výčet</i></td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/enum.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/enum.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>138</td><td>article_07/rectangle_1.fs</td><td>typ Rectangle založený na n-tici</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/rectangle_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/rectangle_1.fs</a></td></tr>
+<tr><td>139</td><td>article_07/rectangle_2.fs</td><td>úprava předchozího příkladu; pattern matching</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/rectangle_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/rectangle_2.fs</a></td></tr>
+<tr><td>140</td><td>article_07/rectangle_3.fs</td><td>úprava předchozího příkladu, explicitní pojmenování</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/rectangle_3.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/rectangle_3.fs</a></td></tr>
+<tr><td>141</td><td>article_07/rectangle_4.fs</td><td>různé jmenné prostory</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/rectangle_4.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/rectangle_4.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>142</td><td>article_07/struct_type_1.fs</td><td>definice záznamu (record, struct)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/struct_type_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/struct_type_1.fs</a></td></tr>
+<tr><td>143</td><td>article_07/struct_type_2.fs</td><td>rozšíření o funkci pro tisk záznamu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/struct_type_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/struct_type_2.fs</a></td></tr>
+<tr><td>144</td><td>article_07/struct_type_3.fs</td><td>automatické odvození datového typu parametru funkce</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/struct_type_3.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/struct_type_3.fs</a></td></tr>
+<tr><td>145</td><td>article_07/struct_type_4.fs</td><td>otestování mezí automatického odvozování typů parametrů (nefunkční varianta)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/struct_type_4.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/struct_type_4.fs</a></td></tr>
+<tr><td>146</td><td>article_07/struct_type_5.fs</td><td>otestování mezí automatického odvozování typů parametrů (funkční varianta)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/struct_type_5.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/struct_type_5.fs</a></td></tr>
+<tr><td>147</td><td>article_07/tree.fs</td><td>datový typ představující rekurzivní definici binárního stromu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/tree.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/tree.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>148</td><td>article_07/object_1.fs</td><td>jednoduchá třída s&nbsp;dvojicí atributů</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/object_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/object_1.fs</a></td></tr>
+<tr><td>149</td><td>article_07/object_2.fs</td><td>přidání metody do třídy</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/object_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/object_2.fs</a></td></tr>
+<tr><td>150</td><td>article_07/object_3.fs</td><td>třída s&nbsp;lokální vazbou na symbol (<i>binding</i>)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/object_3.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/object_3.fs</a></td></tr>
+<tr><td>151</td><td>article_07/object_4.fs</td><td>dtto, ale s&nbsp;explicitním přístupem k&nbsp;atributům objektu</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/object_4.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/object_4.fs</a></td></tr>
+<tr><td>152</td><td>article_07/object_5.fs</td><td>metoda vytvářející nový objekt</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/object_5.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/object_5.fs</a></td></tr>
+<tr><td>153</td><td>article_07/object_6.fs</td><td>třída reprezentující dvouprvkový vektor</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/object_6.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/object_6.fs</a></td></tr>
+<tr><td>154</td><td>article_07/object_7.fs</td><td>doplnění předchozí třídy o přetížený operátor +</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/object_7.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/object_7.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>155</td><td>article_07/oop_1.fs</td><td>objektově orientované programování: vztah mezi dvojicí tříd (předek, potomek)</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/oop_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/oop_1.fs</a></td></tr>
+<tr><td>156</td><td>article_07/oop_2.fs</td><td>objektově orientované programování: dvojice tříd odvozená ze stejného předka</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/oop_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/oop_2.fs</a></td></tr>
+<tr><td>157</td><td>article_07/oop_3.fs</td><td>objektově orientované programování: přetypování na předka</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/oop_3.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/oop_3.fs</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>158</td><td>article_07/local_symbol_1.fs</td><td>čtení atributů objektu mimo definici třídy</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/local_symbol_1.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/local_symbol_1.fs</a></td></tr>
+<tr><td>159</td><td>article_07/local_symbol_2.fs</td><td>čtení lokálních symbolů objektu mimo definici třídy</td><td><a href="https://github.com/tisnik/f-sharp-examples/tree/master/article_07/local_symbol_2.fs">https://github.com/tisnik/f-sharp-examples/tree/master/article_07/local_symbol_2.fs</a></td></tr>
 </table>
 
 
@@ -666,6 +1626,14 @@ jazyku F#:</div></p>
 <a href="https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-6-db502830403">https://cscalfani.medium.com/so-you-want-to-be-a-functional-programmer-part-6-db502830403</a>
 </li>
 
+<li>Don Syme<br />
+<a href="https://en.wikipedia.org/wiki/Don_Syme">https://en.wikipedia.org/wiki/Don_Syme</a>
+</li>
+
+<li>Python to OCaml: Retrospective<br />
+<a href="http://roscidus.com/blog/blog/2014/06/06/python-to-ocaml-retrospective/">http://roscidus.com/blog/blog/2014/06/06/python-to-ocaml-retrospective/</a>
+</li>
+
 <li>Why Programmers Need Limits<br />
 <a href="https://cscalfani.medium.com/why-programmers-need-limits-3d96e1a0a6db">https://cscalfani.medium.com/why-programmers-need-limits-3d96e1a0a6db</a>
 </li>
@@ -734,14 +1702,6 @@ jazyku F#:</div></p>
 <a href="https://en.wikipedia.org/wiki/Standard_ML">https://en.wikipedia.org/wiki/Standard_ML</a>
 </li>
 
-<li>Don Syme<br />
-<a href="https://en.wikipedia.org/wiki/Don_Syme">https://en.wikipedia.org/wiki/Don_Syme</a>
-</li>
-
-<li>Python to OCaml: Retrospective<br />
-<a href="http://roscidus.com/blog/blog/2014/06/06/python-to-ocaml-retrospective/">http://roscidus.com/blog/blog/2014/06/06/python-to-ocaml-retrospective/</a>
-</li>
-
 <li>Xavier Leroy<br />
 <a href="https://en.wikipedia.org/wiki/Xavier_Leroy">https://en.wikipedia.org/wiki/Xavier_Leroy</a>
 </li>
@@ -754,6 +1714,14 @@ jazyku F#:</div></p>
 <a href="https://fsharpforfunandprofit.com/posts/the-option-type/">https://fsharpforfunandprofit.com/posts/the-option-type/</a>
 </li>
 
+<li>Operators<br />
+<a href="https://ocaml.org/docs/operators">https://ocaml.org/docs/operators</a>
+</li>
+
+<li>Operator overloading<br />
+<a href="https://en.wikipedia.org/wiki/Operator_overloading">https://en.wikipedia.org/wiki/Operator_overloading</a>
+</li>
+
 </ol>
 
 
@@ -762,3 +1730,4 @@ jazyku F#:</div></p>
 <p><small>Autor: <a href="http://www.fit.vutbr.cz/~tisnovpa">Pavel Tišnovský</a> &nbsp; 2023</small></p>
 </body>
 </html>
+
