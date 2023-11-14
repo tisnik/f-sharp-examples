@@ -3,7 +3,7 @@ type User =
       Name: string
       Surname: string}
 
-let print_name x =
+let print_user x =
     printf "%s %s" x.Name x.Surname
 
 let pepa =
@@ -12,4 +12,4 @@ let pepa =
       Surname = "Vyskočil"}
 
 
-print_name pepa
+print_user pepa

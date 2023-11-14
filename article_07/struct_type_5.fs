@@ -7,7 +7,7 @@ type UserWithoutID =
     { Name: string
       Surname: string}
 
-let print_name (x:User) =
+let print_user (x:User) =
     printf "%s %s" x.Name x.Surname
 
 let pepa =
@@ -17,4 +17,4 @@ let pepa =
 
 
 (* funkcni varianta *)
-print_name pepa
+print_user pepa
